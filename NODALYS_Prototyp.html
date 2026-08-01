@@ -1,0 +1,1529 @@
+<!DOCTYPE html>
+<html lang="de">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>NODALYS – Prototyp</title>
+<style>
+  html{font-size:100%;}
+  :root{
+    --sand:#EAE1CE; --sand-card:#F4EDDD; --sand-border:#DED2B7;
+    --ink:#332E27; --ink-soft:#7A7263; --ink-faint:#A69E8C;
+    --blue:#54628F; --blue-soft:#DCE1EE;
+    --rose:#C0808A; --rose-soft:#F1DEE0;
+    --green:#6E8F6E; --green-soft:#DEE7DA;
+    --purple:#8B7FBF; --purple-soft:#E4DFF3;
+    --radius:20px; --radius-sm:12px;
+    --serif: Georgia, 'Times New Roman', serif;
+    --sans: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
+  }
+  body.dark{
+    --sand:#221F1B; --sand-card:#2B2721; --sand-border:#3A352C;
+    --ink:#EDE6D8; --ink-soft:#B5AC9A; --ink-faint:#847C6C;
+    --blue-soft:#333A52; --rose-soft:#3E2E30; --green-soft:#2B342B; --purple-soft:#332E45;
+  }
+  /* Lighter, friendlier touch for confirmed under-16 profiles: rounder shapes, warmer accent.
+     Deliberately a subtle shift, not a full separate design system – see notes in the concept doc. */
+  body.kids-mode{ --radius:28px; --radius-sm:18px; --blue:#4A9BB0; --blue-soft:#DCEFF0; }
+  body.kids-mode .phone{ border-radius:44px; }
+  body.kids-mode .btn{ border-radius:22px; }
+  body.kids-mode .tagchip, body.kids-mode .pill, body.kids-mode .tabpill{ border-radius:24px; }
+  *{box-sizing:border-box;}
+  body{margin:0;background:#DCD3C0;font-family:var(--sans);display:flex;justify-content:center;padding:24px 12px;min-height:100vh;font-size:1rem;}
+  .phone{
+    width:400px; max-width:100%; background:var(--sand); border-radius:38px; border:10px solid #171512;
+    box-shadow:0 30px 60px rgba(0,0,0,.35); overflow:hidden; position:relative; min-height:840px; display:flex; flex-direction:column;
+    color:var(--ink); transition:background .25s;
+  }
+  .statusbar{display:flex;justify-content:space-between;align-items:center;padding:14px 22px 4px;font-size:0.8125rem;color:var(--ink-soft);font-weight:600;}
+  .screens{flex:1;overflow-y:auto;padding:6px 22px 90px;}
+  .screen{display:none;animation:fade .25s ease;}
+  .screen.active{display:block;}
+  @keyframes fade{from{opacity:0;transform:translateY(6px);}to{opacity:1;transform:none;}}
+
+  h1.hero{font-family:var(--serif);font-size:1.875rem;margin:6px 0 2px;font-weight:400;}
+  .eyebrow{font-size:0.75rem;letter-spacing:1.5px;color:var(--ink-soft);text-transform:uppercase;font-weight:700;}
+  .sub{color:var(--ink-soft);font-size:0.875rem;margin-bottom:18px;}
+  .card{background:var(--sand-card);border:1px solid var(--sand-border);border-radius:var(--radius);padding:18px;margin-bottom:16px;}
+  .label{font-size:0.6875rem;letter-spacing:1.2px;text-transform:uppercase;color:var(--ink-soft);font-weight:700;margin-bottom:10px;display:flex;align-items:center;gap:6px;}
+  .row{display:flex;align-items:center;justify-content:space-between;gap:10px;}
+  .rowline{display:flex;align-items:center;justify-content:space-between;padding:12px 0;border-bottom:1px solid var(--sand-border);font-size:0.9rem;}
+  .rowline:last-child{border-bottom:none;}
+  .val{font-family:var(--serif);font-size:1.375rem;color:var(--blue);}
+
+  input[type=range]{width:100%;-webkit-appearance:none;height:6px;border-radius:4px;background:var(--sand-border);margin:10px 0 4px;}
+  input[type=range]::-webkit-slider-thumb{-webkit-appearance:none;width:22px;height:22px;border-radius:50%;background:var(--blue);border:3px solid var(--sand-card);box-shadow:0 1px 4px rgba(0,0,0,.3);}
+  .scalehints{display:flex;justify-content:space-between;font-size:0.6875rem;color:var(--ink-faint);}
+
+  input[type=text], input[type=number]{width:100%;padding:13px 15px;border:1px solid var(--sand-border);border-radius:14px;background:var(--sand-card);color:var(--ink);font-size:0.875rem;margin-bottom:10px;font-family:var(--sans);}
+  input[type=text]::placeholder, input[type=number]::placeholder{color:var(--ink-faint);}
+
+  .switch{position:relative;width:46px;height:26px;flex-shrink:0;}
+  .switch input{opacity:0;width:0;height:0;}
+  .slider-track{position:absolute;inset:0;background:var(--sand-border);border-radius:20px;cursor:pointer;transition:.2s;}
+  .slider-track:before{content:"";position:absolute;width:20px;height:20px;left:3px;top:3px;background:#fff;border-radius:50%;transition:.2s;box-shadow:0 1px 3px rgba(0,0,0,.3);}
+  .switch input:checked + .slider-track{background:var(--blue);}
+  .switch input:checked + .slider-track:before{transform:translateX(20px);}
+
+  .btn{border:none;border-radius:16px;padding:15px 18px;font-size:0.9375rem;font-weight:600;cursor:pointer;width:100%;text-align:center;font-family:var(--sans);}
+  .btn-primary{background:var(--blue);color:#fff;}
+  .btn-ghost{background:transparent;color:var(--blue);border:1px solid var(--blue-soft);}
+  .btn-sm{width:auto;padding:8px 14px;font-size:0.8125rem;border-radius:12px;}
+  .btn-row{display:flex;gap:10px;}
+  .btn:disabled{opacity:.4;}
+  a.linkline{color:var(--blue);text-decoration:underline;font-size:0.8125rem;display:block;text-align:center;margin-top:12px;cursor:pointer;}
+
+  .pill{display:inline-flex;align-items:center;padding:9px 14px;border-radius:20px;background:var(--sand-card);border:1px solid var(--sand-border);font-size:0.8125rem;margin:0 8px 8px 0;cursor:pointer;color:var(--ink);}
+  .pill.selected{background:var(--rose-soft);border-color:var(--rose);color:var(--rose);font-weight:600;}
+  .pillwrap{display:flex;flex-wrap:wrap;}
+
+  .choice{display:block;width:100%;text-align:left;background:var(--sand-card);border:1px solid var(--sand-border);border-radius:14px;padding:14px 16px;margin-bottom:10px;font-size:0.9375rem;color:var(--ink);cursor:pointer;font-family:var(--sans);}
+  .choice.selected{border-color:var(--blue);background:var(--blue-soft);font-weight:600;}
+  .choice small{display:block;color:var(--ink-soft);font-weight:400;margin-top:2px;}
+
+  nav#bottomnav{position:absolute;left:0;right:0;bottom:0;background:var(--sand-card);border-top:1px solid var(--sand-border);display:flex;padding:10px 6px 16px;}
+  nav#bottomnav.hidden{display:none;}
+  .nav-btn{flex:1;display:flex;flex-direction:column;align-items:center;gap:4px;background:none;border:none;color:var(--ink-faint);font-size:0.65rem;font-weight:600;cursor:pointer;padding:4px;}
+  .nav-btn svg{width:22px;height:22px;}
+  .nav-btn.active{color:var(--blue);}
+
+  .disclaimer{font-size:0.72rem;color:var(--ink-faint);line-height:1.5;font-style:italic;margin-top:14px;}
+  .badge-pro{display:inline-block;background:var(--purple);color:#fff;font-size:0.6rem;font-weight:700;letter-spacing:.5px;padding:2px 7px;border-radius:8px;margin-left:6px;vertical-align:middle;}
+  .badge-ok{display:inline-block;background:var(--green);color:#fff;font-size:0.6rem;font-weight:700;padding:2px 7px;border-radius:8px;margin-left:6px;}
+
+  .daycircles{display:flex;justify-content:space-between;margin:10px 0;}
+  .daycircle{display:flex;flex-direction:column;align-items:center;gap:6px;font-size:0.6875rem;color:var(--ink-soft);}
+  .daycircle .dot{width:34px;height:34px;border-radius:50%;display:flex;align-items:center;justify-content:center;font-weight:700;font-size:0.75rem;color:var(--ink);background:var(--blue-soft);}
+
+  .segctl{display:flex;background:var(--sand-border);border-radius:14px;padding:3px;margin-bottom:12px;}
+  .segctl button{flex:1;border:none;background:transparent;padding:9px;border-radius:11px;font-size:0.8125rem;font-weight:600;color:var(--ink-soft);cursor:pointer;font-family:var(--sans);}
+  .segctl button.active{background:var(--sand-card);color:var(--ink);}
+
+  .calgrid{display:grid;grid-template-columns:repeat(7,1fr);gap:4px;text-align:center;}
+  .calgrid .dow{font-size:0.625rem;color:var(--ink-faint);margin-bottom:4px;}
+  .calgrid .day{aspect-ratio:1;display:flex;align-items:center;justify-content:center;border-radius:10px;font-size:0.78rem;background:var(--sand);cursor:pointer;position:relative;}
+  .calgrid .day.has:after{content:"";position:absolute;bottom:4px;width:4px;height:4px;border-radius:50%;background:var(--blue);}
+  .calgrid .day.today{background:var(--blue);color:#fff;font-weight:700;}
+  .calgrid .day .tagbadge{position:absolute;top:2px;right:2px;background:var(--purple);color:#fff;font-size:0.5rem;width:13px;height:13px;border-radius:50%;display:flex;align-items:center;justify-content:center;}
+
+  .chartbox{margin-top:6px;}
+  .chartbox svg{width:100%;height:150px;overflow:visible;}
+  .legend{display:flex;flex-wrap:wrap;gap:10px;margin-top:10px;font-size:0.72rem;color:var(--ink-soft);}
+  .legend span{display:inline-flex;align-items:center;gap:5px;}
+  .legend i{width:16px;height:2px;display:inline-block;position:relative;}
+
+  .modal-bg{position:absolute;inset:0;background:rgba(20,17,12,.55);display:flex;align-items:center;justify-content:center;z-index:50;border-radius:28px;}
+  .modal-bg.hidden{display:none;}
+  .modal{background:var(--sand-card);border-radius:20px;padding:22px;width:82%;max-height:74%;overflow-y:auto;}
+  .modal h3{font-family:var(--serif);font-weight:400;margin-top:0;}
+  .close-x{float:right;background:none;border:none;font-size:1.1rem;color:var(--ink-soft);cursor:pointer;}
+
+  .stepper{display:flex;align-items:center;justify-content:center;gap:22px;margin:12px 0;}
+  .stepbtn{width:40px;height:40px;border-radius:50%;background:var(--sand-border);border:none;font-size:1.25rem;color:var(--ink);cursor:pointer;}
+  .steptext{font-family:var(--serif);font-size:1.625rem;min-width:80px;text-align:center;}
+
+  .emoji4{display:flex;justify-content:space-between;}
+  .emoji4 .opt{flex:1;text-align:center;background:var(--sand-card);border:1px solid var(--sand-border);border-radius:14px;padding:10px 4px;margin:0 4px;cursor:pointer;font-size:1.375rem;}
+  .emoji4 .opt div.tlabel{font-size:0.6875rem;color:var(--ink-soft);margin-top:4px;}
+  .emoji4 .opt.selected{border-color:var(--green);background:var(--green-soft);}
+
+  .toplang{position:absolute;top:14px;right:22px;display:flex;background:var(--sand-border);border-radius:10px;overflow:hidden;font-size:0.6875rem;font-weight:700;z-index:5;}
+  .toplang button{border:none;background:transparent;padding:5px 9px;color:var(--ink-soft);cursor:pointer;font-family:var(--sans);}
+  .toplang button.active{background:var(--blue);color:#fff;}
+  .backbtn{position:absolute;top:10px;left:16px;z-index:5;background:var(--sand-border);border:none;width:32px;height:32px;border-radius:50%;font-size:1.25rem;color:var(--ink);cursor:pointer;display:flex;align-items:center;justify-content:center;}
+  .backbtn.hidden{display:none;}
+
+  .settings-row{display:flex;justify-content:space-between;align-items:center;padding:16px 18px;background:var(--sand-card);border:1px solid var(--sand-border);border-radius:16px;margin-bottom:10px;cursor:pointer;font-weight:600;font-size:0.906rem;}
+  .settings-row .chev{color:var(--ink-faint);font-size:1rem;}
+  .tip-banner{background:var(--sand-border);border-radius:12px;padding:10px 12px;font-size:0.78rem;color:var(--ink-soft);display:flex;gap:8px;align-items:flex-start;margin-top:10px;}
+  .tabs-scroll{display:flex;gap:8px;overflow-x:auto;padding-bottom:6px;margin-bottom:14px;}
+  .tabs-scroll .tabpill{flex-shrink:0;padding:9px 16px;border-radius:20px;background:var(--sand-card);border:1px solid var(--sand-border);font-size:0.8125rem;font-weight:600;cursor:pointer;color:var(--ink-soft);}
+  .tabs-scroll .tabpill.active{background:var(--blue);color:#fff;border-color:var(--blue);}
+  .locked-row{opacity:.45;}
+  .med-card{background:var(--blue);color:#fff;border-radius:18px;padding:16px 18px;margin-bottom:14px;display:flex;justify-content:space-between;align-items:center;}
+  .med-card .checkbtn{width:34px;height:34px;border-radius:50%;background:rgba(255,255,255,.2);border:none;color:#fff;font-size:1rem;cursor:pointer;flex-shrink:0;}
+  .med-card .checkbtn.done{background:#fff;color:var(--blue);}
+  .tagchip{display:inline-block;padding:8px 14px;border-radius:16px;border:1px solid var(--sand-border);background:var(--sand-card);font-size:0.8125rem;margin:0 6px 6px 0;cursor:pointer;transition:box-shadow .2s;}
+  .tagchip.on{background:var(--blue);color:#fff;border-color:var(--blue);}
+  .tagchip.dashed{border-style:dashed;background:transparent;}
+  @keyframes pulseFlash{0%{box-shadow:0 0 0 0 rgba(110,143,110,.7);}100%{box-shadow:0 0 0 12px rgba(110,143,110,0);}}
+  .tagchip.justsaved{animation:pulseFlash .6s ease-out;}
+  .val.justsaved{animation:pulseFlash .6s ease-out;border-radius:8px;}
+  .toast{position:absolute;left:50%;bottom:104px;transform:translateX(-50%) translateY(14px);background:var(--ink);color:var(--sand);padding:9px 18px;border-radius:20px;font-size:0.8125rem;opacity:0;pointer-events:none;transition:opacity .25s, transform .25s;z-index:60;white-space:nowrap;}
+  .toast.show{opacity:1;transform:translateX(-50%) translateY(0);}
+  .faq-q{font-weight:700;cursor:pointer;padding:10px 0;font-size:0.875rem;}
+  .faq-a{font-size:0.8125rem;color:var(--ink-soft);padding-bottom:10px;display:none;}
+  .faq-a.open{display:block;}
+  table.datatable{width:100%;border-collapse:collapse;font-size:0.78rem;}
+  table.datatable th, table.datatable td{padding:6px 4px;border-bottom:1px solid var(--sand-border);text-align:left;}
+</style>
+</head>
+<body>
+<div class="phone" id="phone">
+  <button id="backBtn" class="backbtn hidden" onclick="goBack()" aria-label="Zurück">‹</button>
+  <div class="toplang">
+    <button id="langDE" class="active" onclick="setLang('de')">DE</button>
+    <button id="langEN" onclick="setLang('en')">EN</button>
+  </div>
+  <div class="statusbar"><span>9:41</span><span>●●●● 🔋</span></div>
+  <div class="screens" id="screens">
+
+    <!-- ONBOARDING: WELCOME -->
+    <section class="screen active" id="s-welcome">
+      <div class="eyebrow" style="margin-top:34px;" data-i18n="local_private">100% LOKAL & PRIVAT</div>
+      <h1 class="hero" style="font-size:2.25rem;letter-spacing:2px;">NODALYS</h1>
+      <p class="sub" data-i18n="welcome_sub">Verstehe deine persönlichen Muster im Alltag.</p>
+      <div class="card">
+        <p style="margin:0;font-size:0.875rem;line-height:1.6;" data-i18n="welcome_body">NODALYS sammelt, strukturiert und visualisiert deine Daten – ohne Diagnose, ohne Bewertung, ohne Interpretation.</p>
+      </div>
+      <p class="disclaimer" data-i18n="disclaimer_main">NODALYS ist kein Medizinprodukt und stellt keine Diagnose oder medizinische Empfehlung dar.</p>
+      <div style="height:16px;"></div>
+      <button class="btn btn-primary" data-i18n="start" onclick="go('s-name')">Los geht's</button>
+    </section>
+
+    <!-- ONBOARDING: NAME -->
+    <section class="screen" id="s-name">
+      <div class="eyebrow" data-i18n="step0">WILLKOMMEN</div>
+      <h1 class="hero" data-i18n="name_q">Wie heißt du?</h1>
+      <p class="sub" data-i18n="name_hint">Damit die App dich persönlich begrüßen kann.</p>
+      <input type="text" id="inpName" placeholder="Name" data-i18n-placeholder="ph_name">
+      <button class="btn btn-primary" data-i18n="next" onclick="saveName()">Weiter</button>
+    </section>
+
+    <!-- ONBOARDING: PROFILE (gender + optional details) -->
+    <section class="screen" id="s-profile">
+      <div class="eyebrow" data-i18n="step">SCHRITT 1</div>
+      <h1 class="hero" data-i18n="gender_q">Wie darf ich dich ansprechen?</h1>
+      <p class="sub" data-i18n="gender_hint">Manche Fragen im Onboarding unterscheiden sich – z.B. zum Zyklus.</p>
+      <div id="genderChoices"></div>
+      <div style="height:6px;"></div>
+      <div class="label" style="margin-top:6px;" data-i18n="optional_details">OPTIONAL</div>
+      <input type="number" id="inpAge" placeholder="Alter" data-i18n-placeholder="ph_age">
+      <div style="display:flex;gap:10px;">
+        <input type="number" id="inpHeight" placeholder="Größe (cm)" data-i18n-placeholder="ph_height" style="flex:1;">
+        <input type="number" id="inpWeight" placeholder="Gewicht (kg)" data-i18n-placeholder="ph_weight" style="flex:1;">
+      </div>
+      <div style="height:8px;"></div>
+      <button class="btn btn-primary" data-i18n="next" onclick="saveProfileDetails()">Weiter</button>
+    </section>
+
+    <!-- ONBOARDING: PARENTAL CONSENT (only shown if entered age < 16) -->
+    <section class="screen" id="s-parentalconsent">
+      <div class="eyebrow" data-i18n="consent_eyebrow">WICHTIG</div>
+      <h1 class="hero" data-i18n="consent_title">Einwilligung durch Eltern</h1>
+      <p class="sub" data-i18n="consent_body">Für Nutzer:innen unter 16 braucht NODALYS die Zustimmung eines Erziehungsberechtigten, bevor persönliche Daten erfasst werden (Art. 8 DSGVO). Bitte gib das Gerät kurz weiter, falls du das selbst ausfüllst.</p>
+      <div class="card">
+        <div class="label" data-i18n="consent_name_label">NAME DER ERZIEHUNGSBERECHTIGTEN PERSON</div>
+        <input type="text" id="inpGuardianName" placeholder="Name" data-i18n-placeholder="ph_name">
+        <label style="display:flex;gap:10px;align-items:flex-start;font-size:0.8125rem;color:var(--ink-soft);cursor:pointer;margin-top:6px;">
+          <input type="checkbox" id="chkGuardianConsent" style="margin-top:3px;" onchange="updateConsentBtn()">
+          <span data-i18n="consent_checkbox">Ich bin erziehungsberechtigt und willige in die Verarbeitung der (Gesundheits-)Daten meines Kindes durch NODALYS ein.</span>
+        </label>
+      </div>
+      <p class="disclaimer" data-i18n="consent_note">Hinweis (Prototyp): Dies ist eine selbst erklärte Einwilligung ohne Identitätsprüfung – für den echten Launch braucht es ein verifiziertes Verfahren (z.B. Bestätigungs-E-Mail an die Erziehungsberechtigten).</p>
+      <button class="btn btn-primary" id="consentConfirmBtn" data-i18n="consent_confirm" onclick="confirmParentalConsent()" disabled>Bestätigen</button>
+    </section>
+
+    <!-- ONBOARDING: FOCUS AREAS -->
+    <section class="screen" id="s-focus">
+      <div class="eyebrow" data-i18n="step2">SCHRITT 2</div>
+      <h1 class="hero" data-i18n="focus_q">Was möchtest du besser verstehen?</h1>
+      <p class="sub" data-i18n="multi_hint">Mehrfachauswahl möglich.</p>
+      <div class="pillwrap" id="focusPills"></div>
+      <div style="height:8px;"></div>
+      <button class="btn btn-primary" data-i18n="next" onclick="go('s-reason')">Weiter</button>
+    </section>
+
+    <!-- ONBOARDING: REASON -->
+    <section class="screen" id="s-reason">
+      <div class="eyebrow" data-i18n="step3">SCHRITT 3</div>
+      <h1 class="hero" data-i18n="reason_q">Warum nutzt du NODALYS?</h1>
+      <div id="reasonChoices"></div>
+      <div style="height:8px;"></div>
+      <button class="btn btn-primary" data-i18n="next" onclick="goToMeds()">Weiter</button>
+    </section>
+
+    <!-- ONBOARDING: MEDICATION Y/N (title set dynamically based on reason) -->
+    <section class="screen" id="s-meds">
+      <div class="eyebrow" data-i18n="step4">SCHRITT 4</div>
+      <h1 class="hero" id="medsQTitle">Nutzt du ADHS-Medikamente?</h1>
+      <p class="sub" id="medsQHint">Diese Angabe ist immer optional und später änderbar.</p>
+      <div id="medsChoices"></div>
+      <div style="height:8px;"></div>
+      <button class="btn btn-primary" data-i18n="next" onclick="onMedsNext()">Weiter</button>
+    </section>
+
+    <!-- ONBOARDING: MEDICATION SETUP (wirkstoff+dosis only) -->
+    <section class="screen" id="s-medsetup">
+      <div class="eyebrow" data-i18n="step4">SCHRITT 4</div>
+      <h1 class="hero" data-i18n="medsetup_title">Medikament hinzufügen</h1>
+      <p class="sub" data-i18n="medsetup_hint">Der Name reicht, den du kennst – ob Markenname oder Wirkstoff. Uhrzeiten brauchen wir nicht.</p>
+      <input type="text" id="inpWirkstoff" placeholder="Medikamentenname (Marke oder Wirkstoff)" data-i18n-placeholder="ph_wirkstoff">
+      <input type="text" id="inpDosis" placeholder="Dosis (optional, z.B. 20mg)" data-i18n-placeholder="ph_dosis">
+      <div class="label" data-i18n="freq_label">WIE OFT AM TAG?</div>
+      <select id="inpFrequency" style="width:100%;padding:13px 15px;border:1px solid var(--sand-border);border-radius:14px;background:var(--sand-card);color:var(--ink);font-size:0.875rem;margin-bottom:10px;font-family:var(--sans);">
+        <option value="1">1x</option><option value="2">2x</option><option value="3">3x</option><option value="4">4x+</option>
+      </select>
+      <button class="btn btn-ghost" style="margin-bottom:14px;" data-i18n="add_more" onclick="addMedSetupEntry()">+ Weiteres Medikament speichern</button>
+      <div id="medsetupList"></div>
+      <div style="height:6px;"></div>
+      <button class="btn btn-primary" data-i18n="next" onclick="finishMedSetup()">Weiter</button>
+      <a class="linkline" data-i18n="later_settings" onclick="finishMedSetup()">Später in den Einstellungen hinzufügen</a>
+    </section>
+
+    <!-- ONBOARDING: CYCLE (conditional, women/divers only) -->
+    <section class="screen" id="s-cycle">
+      <div class="eyebrow" data-i18n="step5">SCHRITT 5</div>
+      <h1 class="hero" data-i18n="cycle_q">Möchtest du deinen Zyklus beobachten?</h1>
+      <p class="sub" data-i18n="cycle_hint">Periode, PMS-Symptome, Eisprung – neutral dokumentiert, ohne Bewertung.</p>
+      <div class="tip-banner">⚠️ <span data-i18n="disclaimer_cycle">Wichtig: NODALYS dient nicht der Verhütung und ersetzt keine Verhütungsmethode. Verlasse dich nicht auf diese App, um eine Schwangerschaft zu vermeiden.</span></div>
+      <div style="height:10px;"></div>
+      <div id="cycleChoices"></div>
+      <div style="height:8px;"></div>
+      <button class="btn btn-primary" data-i18n="next" onclick="finishCycleStep()">Weiter</button>
+    </section>
+
+    <!-- ONBOARDING: HORMONAL STATUS (conditional, only if cycle=yes) -->
+    <section class="screen" id="s-hormonal">
+      <div class="eyebrow" data-i18n="step5">SCHRITT 5</div>
+      <h1 class="hero" data-i18n="hormonal_q">Aktueller hormoneller Status?</h1>
+      <p class="sub" data-i18n="hormonal_hint">Hilft, den Zyklus richtig einzuordnen – rein informativ, keine Bewertung.</p>
+      <div id="hormonalChoices"></div>
+      <div style="height:8px;"></div>
+      <button class="btn btn-primary" data-i18n="next" onclick="goToHormoneModule()">Weiter</button>
+    </section>
+
+    <!-- ONBOARDING: GENERAL HORMONE MODULE (everyone, independent of cycle) -->
+    <section class="screen" id="s-hormonemodule">
+      <div class="eyebrow" data-i18n="step5b">SCHRITT 5</div>
+      <h1 class="hero" data-i18n="hormone_module_q">Möchtest du allgemeine hormonelle Veränderungen beobachten?</h1>
+      <p class="sub" id="hormoneModuleHint">Z.B. Pubertät, Wechseljahre oder andere hormonelle Veränderungen – unabhängig vom Zyklus.</p>
+      <div id="hormoneModuleChoices"></div>
+      <div style="height:8px;"></div>
+      <button class="btn btn-primary" data-i18n="next" onclick="finishHormoneModuleStep()">Weiter</button>
+    </section>
+
+    <!-- ONBOARDING: HEALTH SYNC -->
+    <section class="screen" id="s-healthsync" style="text-align:center;">
+      <div style="height:50px;"></div>
+      <div style="font-size:2.75rem;color:var(--blue);">📈</div>
+      <h1 class="hero" data-i18n="sync_title">Health-Daten verbinden</h1>
+      <p class="sub" data-i18n="sync_body">Verbinde Apple Health oder Google Health Connect für automatisches Schlaf- und Aktivitätstracking.</p>
+      <button class="btn btn-primary" data-i18n="sync_btn" onclick="state.healthSync=true; go('s-notifications');">Health-Daten verbinden</button>
+      <a class="linkline" data-i18n="skip_now" onclick="go('s-notifications');">Später</a>
+    </section>
+
+    <!-- ONBOARDING: NOTIFICATION PREFERENCES -->
+    <section class="screen" id="s-notifications">
+      <div class="eyebrow" data-i18n="step5c">SCHRITT 5</div>
+      <h1 class="hero" data-i18n="notif_q">Möchtest du Erinnerungen erhalten?</h1>
+      <p class="sub" data-i18n="notif_hint">Ganz optional – du kannst das jederzeit in den Einstellungen ändern.</p>
+      <div class="card">
+        <div class="rowline"><span data-i18n="notif_meds_label">Medikamenten-Erinnerung (genommen: ja/nein)</span>
+          <label class="switch"><input type="checkbox" id="notifMedsChk" onchange="state.notif.medsReminder=this.checked"><span class="slider-track"></span></label></div>
+        <div class="rowline"><span data-i18n="notif_recap_label">Abend-Recap</span>
+          <label class="switch"><input type="checkbox" id="notifRecapChk" onchange="state.notif.eveningRecap=this.checked"><span class="slider-track"></span></label></div>
+        <p style="font-size:0.78rem;color:var(--ink-soft);margin:8px 0 0;" data-i18n="notif_recap_desc">Kurze Zusammenfassung deines Tages am Abend, ca. 1 Minute Lesezeit.</p>
+      </div>
+      <button class="btn btn-primary" data-i18n="next" onclick="go('s-tailor'); initTailorDefaults(); renderTailor();">Weiter</button>
+    </section>
+
+    <!-- ONBOARDING: TAILOR TRACKING -->
+    <section class="screen" id="s-tailor">
+      <div class="eyebrow" data-i18n="step6">SCHRITT 6</div>
+      <h1 class="hero" data-i18n="tailor_title">Tracking anpassen</h1>
+      <p class="sub" data-i18n="tailor_hint">Bis zu 3 Module kostenlos – weitere mit Premium.</p>
+      <div id="tailorList"></div>
+      <div style="height:8px;"></div>
+      <button class="btn btn-primary" data-i18n="next" onclick="buildReadySummary(); go('s-ready');">Weiter</button>
+    </section>
+
+    <!-- ONBOARDING: READY -->
+    <section class="screen" id="s-ready">
+      <h1 class="hero" style="margin-top:60px;" data-i18n="ready_title">Alles bereit.</h1>
+      <p class="sub" data-i18n="ready_sub">Deine App zeigt jetzt nur, was für dich relevant ist. Du kannst das jederzeit in den Einstellungen anpassen.</p>
+      <div class="card" id="readySummary"></div>
+      <button class="btn btn-primary" data-i18n="open_app" onclick="enterApp()">App öffnen</button>
+    </section>
+
+    <!-- MAIN: TODAY -->
+    <section class="screen" id="s-today">
+      <div class="eyebrow" id="todayDate"></div>
+      <h1 class="hero" id="todayGreeting">Good afternoon</h1>
+      <div id="todayCards"></div>
+      <div class="disclaimer" data-i18n="disclaimer_main">NODALYS ist kein Medizinprodukt und stellt keine Diagnose oder medizinische Empfehlung dar.</div>
+    </section>
+
+    <!-- MAIN: HISTORY -->
+    <!-- MAIN: INSIGHTS -->
+    <section class="screen" id="s-insights">
+      <div class="eyebrow" data-i18n="nav_insights">INSIGHTS</div>
+      <h1 class="hero" data-i18n="insights_title">Deine Muster</h1>
+
+      <div class="segctl">
+        <button id="viewSingleBtn" class="active" onclick="setInsightView('single')" data-i18n="single_view">Einzeln</button>
+        <button id="viewComboBtn" onclick="setInsightView('kombiniert')" data-i18n="combo_view">Kombiniert</button>
+      </div>
+      <div class="segctl">
+        <button id="range7Btn" class="active" onclick="setInsightRange(7)">7 <span data-i18n="days_short">Tage</span></button>
+        <button id="range30Btn" onclick="setInsightRange(30)" data-i18n="month">Monat</button>
+        <button id="range90Btn" onclick="setInsightRange(90)" data-i18n="months3">3 Monate</button>
+      </div>
+      <div class="tabs-scroll" id="insightTabs"></div>
+      <div class="tabs-scroll" id="insightComboPicker" style="display:none;"></div>
+      <div class="tip-banner" id="cycleInsightBanner" style="display:none;">⚠️ <span data-i18n="disclaimer_cycle">Wichtig: NODALYS dient nicht der Verhütung und ersetzt keine Verhütungsmethode. Verlasse dich nicht auf diese App, um eine Schwangerschaft zu vermeiden.</span></div>
+      <div class="card">
+        <div class="row">
+          <div class="label" id="insightChartLabel" style="margin-bottom:0;">MUSTER</div>
+          <button class="btn-sm btn-ghost" style="width:auto;" onclick="toggleInsightMode()" id="modeToggleBtn" data-i18n="show_table">Tabelle</button>
+        </div>
+        <div class="chartbox" id="insightChartBox"></div>
+        <div id="insightTableBox" style="display:none;max-height:220px;overflow-y:auto;"></div>
+        <div class="legend" id="insightLegend"></div>
+      </div>
+
+      <button class="btn btn-ghost" onclick="openRetroLog()" data-i18n="retro_log">📅 Verpasste Tage nachtragen</button>
+      <div style="height:10px;"></div>
+      <div class="btn-row">
+        <button class="btn btn-ghost" id="btnPdf" onclick="tryExport('pdf')" data-i18n="export_pdf">PDF-Bericht</button>
+        <button class="btn btn-ghost" id="btnCsv" onclick="tryExport('csv')" data-i18n="export_csv">CSV-Export</button>
+      </div>
+      <div style="height:10px;"></div>
+      <button class="btn btn-ghost" onclick="toggleHistorySection()" id="historyToggleBtn">📖 <span data-i18n="show_history">Verlauf anzeigen</span></button>
+      <div id="historySection" style="display:none;margin-top:12px;">
+        <h1 class="hero" style="font-size:1.375rem;" data-i18n="history_title">Dein Verlauf</h1>
+        <div class="segctl">
+          <button class="active" onclick="setHistView('week',this)" data-i18n="week">Woche</button>
+          <button onclick="setHistView('month',this)" data-i18n="month">Monat</button>
+        </div>
+        <div id="histWeek" class="card">
+          <div class="label" data-i18n="past7">LETZTE 7 TAGE</div>
+          <div class="daycircles" id="weekCircles"></div>
+        </div>
+        <div id="histMonth" class="card" style="display:none;">
+          <div class="row" style="margin-bottom:8px;">
+            <button class="stepbtn" style="width:30px;height:30px;font-size:1rem;" onclick="shiftMonth(-1)" aria-label="Vorheriger Monat">‹</button>
+            <div class="label" id="monthLabel" style="margin-bottom:0;">JULI 2026</div>
+            <button class="stepbtn" style="width:30px;height:30px;font-size:1rem;" id="nextMonthBtn" onclick="shiftMonth(1)" aria-label="Nächster Monat">›</button>
+          </div>
+          <a class="linkline" id="jumpTodayLink" style="display:none;" onclick="goToCurrentMonth()" data-i18n="jump_today">Zu heute springen</a>
+          <div class="calgrid" id="calGrid"></div>
+        </div>
+      </div>
+      <div class="disclaimer" data-i18n="disclaimer_main">NODALYS ist kein Medizinprodukt und stellt keine Diagnose oder medizinische Empfehlung dar.</div>
+    </section>
+
+    <!-- MAIN: SETTINGS -->
+    <section class="screen" id="s-settings">
+      <div class="eyebrow" data-i18n="nav_settings">EINSTELLUNGEN</div>
+      <h1 class="hero" data-i18n="settings_title">Einstellungen</h1>
+
+      <div class="card" style="display:flex;align-items:center;gap:14px;">
+        <div style="width:46px;height:46px;border-radius:50%;background:var(--blue);color:#fff;display:flex;align-items:center;justify-content:center;font-size:1.25rem;" aria-hidden="true">👤</div>
+        <div>
+          <div style="font-weight:700;" id="profileNameLabel">Zoe</div>
+          <a class="linkline" style="margin:2px 0 0;text-align:left;" id="premiumLinkTop" onclick="openSettingsSection('premium')">🔒 <span data-i18n="upgrade_premium">Premium freischalten</span></a>
+        </div>
+      </div>
+
+      <div class="settings-row" onclick="openSettingsSection('profile')"><span data-i18n="row_profile">Nutzerprofil</span><span class="chev">›</span></div>
+      <div class="settings-row" onclick="openSettingsSection('meds')"><span data-i18n="row_meds">Medikamente</span><span class="chev">›</span></div>
+      <div class="settings-row" onclick="openSettingsSection('modules')"><span data-i18n="row_modules">Tracking-Module</span><span class="chev">›</span></div>
+      <div class="settings-row" onclick="openSettingsSection('privacy')"><span data-i18n="row_privacy">Daten & Datenschutz</span><span class="chev">›</span></div>
+      <div class="settings-row" onclick="openSettingsSection('appearance')"><span data-i18n="row_appearance">Sprache & Darstellung</span><span class="chev">›</span></div>
+      <div class="settings-row" onclick="openSettingsSection('notifications')"><span data-i18n="row_notifications">Benachrichtigungen</span><span class="chev">›</span></div>
+      <div class="settings-row" onclick="openSettingsSection('contact')"><span data-i18n="row_contact">Kontakt & Q&A</span><span class="chev">›</span></div>
+      <div class="settings-row" onclick="openSettingsSection('emergency')"><span data-i18n="row_emergency">Hilfe / Notfall</span><span class="chev">›</span></div>
+
+      <div class="disclaimer" data-i18n="disclaimer_main">NODALYS ist kein Medizinprodukt und stellt keine Diagnose oder medizinische Empfehlung dar.</div>
+    </section>
+
+  </div>
+
+  <nav id="bottomnav" class="hidden">
+    <button class="nav-btn active" data-screen="s-today" onclick="showMain('s-today',this)">
+      <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" aria-hidden="true"><circle cx="12" cy="12" r="9"/><path d="M8 12l3 3 5-6"/></svg>
+      <span data-i18n="nav_today">Heute</span>
+    </button>
+    <button class="nav-btn" data-screen="s-insights" onclick="showMain('s-insights',this)">
+      <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" aria-hidden="true"><path d="M4 20V10M12 20V4M20 20v-7"/></svg>
+      <span data-i18n="nav_insights">Insights</span>
+    </button>
+    <button class="nav-btn" data-screen="s-settings" onclick="showMain('s-settings',this)">
+      <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" aria-hidden="true"><circle cx="12" cy="12" r="3"/><path d="M19 12a7 7 0 00-.1-1.2l2-1.6-2-3.4-2.3.9a7 7 0 00-2-1.2L14 3h-4l-.6 2.5a7 7 0 00-2 1.2l-2.3-.9-2 3.4 2 1.6A7 7 0 005 12c0 .4 0 .8.1 1.2l-2 1.6 2 3.4 2.3-.9a7 7 0 002 1.2L10 21h4l.6-2.5a7 7 0 002-1.2l2.3.9 2-3.4-2-1.6c.1-.4.1-.8.1-1.2z"/></svg>
+      <span data-i18n="nav_settings">Einstellungen</span>
+    </button>
+  </nav>
+
+  <div class="modal-bg hidden" id="modalBg">
+    <div class="modal" id="modalContent"></div>
+  </div>
+  <div class="toast" id="toast" role="status" aria-live="polite"></div>
+</div>
+
+<script>
+/* ---------- i18n ---------- */
+const DICT = {
+  de:{
+    local_private:"100% LOKAL & PRIVAT",
+    welcome_sub:"Verstehe deine persönlichen Muster im Alltag.",
+    welcome_body:"NODALYS sammelt, strukturiert und visualisiert deine Daten – ohne Diagnose, ohne Bewertung, ohne Interpretation.",
+    disclaimer_main:"NODALYS ist kein Medizinprodukt und stellt keine Diagnose oder medizinische Empfehlung dar.",
+    disclaimer_cycle:"Wichtig: NODALYS dient nicht der Verhütung und ersetzt keine Verhütungsmethode. Verlasse dich nicht auf diese App, um eine Schwangerschaft zu vermeiden.",
+    start:"Los geht's", step0:"WILLKOMMEN", step:"SCHRITT 1", step2:"SCHRITT 2", step3:"SCHRITT 3", step4:"SCHRITT 4", step5:"SCHRITT 5", step5b:"SCHRITT 5", step6:"SCHRITT 6",
+    name_q:"Wie heißt du?", name_hint:"Damit die App dich persönlich begrüßen kann.", ph_name:"Name",
+    gender_q:"Wie darf ich dich ansprechen?", gender_hint:"Manche Fragen im Onboarding unterscheiden sich – z.B. zum Zyklus.",
+    optional_details:"OPTIONAL", ph_age:"Alter", ph_height:"Größe (cm)", ph_weight:"Gewicht (kg)",
+    consent_eyebrow:"WICHTIG", consent_title:"Einwilligung durch Eltern",
+    consent_body:"Für Nutzer:innen unter 16 braucht NODALYS die Zustimmung eines Erziehungsberechtigten, bevor persönliche Daten erfasst werden (Art. 8 DSGVO). Bitte gib das Gerät kurz weiter, falls du das selbst ausfüllst.",
+    consent_name_label:"NAME DER ERZIEHUNGSBERECHTIGTEN PERSON",
+    consent_checkbox:"Ich bin erziehungsberechtigt und willige in die Verarbeitung der (Gesundheits-)Daten meines Kindes durch NODALYS ein.",
+    consent_note:"Hinweis (Prototyp): Dies ist eine selbst erklärte Einwilligung ohne Identitätsprüfung – für den echten Launch braucht es ein verifiziertes Verfahren (z.B. Bestätigungs-E-Mail an die Erziehungsberechtigten).",
+    consent_confirm:"Bestätigen",
+    focus_q:"Was möchtest du besser verstehen?", multi_hint:"Mehrfachauswahl möglich.",
+    reason_q:"Warum nutzt du NODALYS?",
+    meds_q_specific:"Nutzt du ADHS-Medikamente?", meds_hint_specific:"Diese Angabe ist immer optional und später änderbar.",
+    meds_q_general:"Nimmst du Medikamente?", meds_hint_general:"Egal ob ADHS, Epilepsie, Depressionen oder etwas anderes – alles ist relevant für deine Muster.",
+    medsetup_title:"Medikament hinzufügen", medsetup_hint:"Der Name reicht, den du kennst – ob Markenname oder Wirkstoff. Uhrzeiten brauchen wir nicht.",
+    ph_wirkstoff:"Medikamentenname (Marke oder Wirkstoff)", ph_dosis:"Dosis (optional, z.B. 20mg)",
+    freq_label:"WIE OFT AM TAG?", add_more:"+ Weiteres Medikament speichern", later_settings:"Später in den Einstellungen hinzufügen",
+    cycle_q:"Möchtest du deinen Zyklus beobachten?", cycle_hint:"Periode, PMS-Symptome, Eisprung – neutral dokumentiert, ohne Bewertung.",
+    hormonal_q:"Aktueller hormoneller Status?", hormonal_hint:"Hilft, den Zyklus richtig einzuordnen – rein informativ, keine Bewertung.",
+    hormone_module_q:"Möchtest du allgemeine hormonelle Veränderungen beobachten?", hormone_module_hint:"Z.B. Pubertät, Testosteron-Schwankungen, Wechseljahre – unabhängig vom Zyklus.",
+    sync_title:"Health-Daten verbinden", sync_body:"Verbinde Apple Health oder Google Health Connect für automatisches Schlaf- und Aktivitätstracking.",
+    sync_btn:"Health-Daten verbinden", skip_now:"Später",
+    step5c:"SCHRITT 5", notif_q:"Möchtest du Erinnerungen erhalten?", notif_hint:"Ganz optional – du kannst das jederzeit in den Einstellungen ändern.",
+    notif_meds_label:"Medikamenten-Erinnerung (genommen: ja/nein)", notif_recap_label:"Abend-Recap",
+    notif_recap_desc:"Kurze Zusammenfassung deines Tages am Abend, ca. 1 Minute Lesezeit.",
+    tailor_title:"Tracking anpassen", tailor_hint:"Bis zu 3 Module kostenlos – weitere mit Premium.",
+    next:"Weiter",
+    ready_title:"Alles bereit.", ready_sub:"Deine App zeigt jetzt nur, was für dich relevant ist. Du kannst das jederzeit in den Einstellungen anpassen.",
+    open_app:"App öffnen",
+    nav_today:"Heute", nav_history:"Verlauf", nav_insights:"Insights", nav_settings:"Einstellungen",
+    history_title:"Dein Verlauf", week:"Woche", month:"Monat", months3:"3 Monate", days_short:"Tage", past7:"LETZTE 7 TAGE",
+    show_history:"Verlauf anzeigen", jump_today:"Zu heute springen",
+    insights_title:"Deine Muster", single_view:"Einzeln", combo_view:"Kombiniert", retro_log:"📅 Verpasste Tage nachtragen", show_table:"Tabelle", show_chart:"Grafik",
+    export_pdf:"PDF-Bericht", export_csv:"CSV-Export",
+    settings_title:"Einstellungen", upgrade_premium:"Premium freischalten",
+    row_profile:"Nutzerprofil", row_meds:"Medikamente", row_modules:"Tracking-Module", row_privacy:"Daten & Datenschutz",
+    row_appearance:"Sprache & Darstellung", row_notifications:"Benachrichtigungen", row_contact:"Kontakt & Q&A", row_emergency:"Hilfe / Notfall",
+    mod_fokus:"Fokus", mod_stimmung:"Stimmung", mod_energie:"Energie", mod_schlaf:"Schlaf", mod_stress:"Stress", mod_medikation:"Medikation", mod_zyklus:"Zyklus", mod_hormone:"Hormone",
+    logcycle:"Zyklus loggen", sleepq:"Schlafqualität", hours:"Std.", poor:"Schlecht", fair:"Ok", good:"Gut", great:"Super",
+  },
+  en:{
+    local_private:"100% LOCAL & PRIVATE",
+    welcome_sub:"Understand your personal patterns in everyday life.",
+    welcome_body:"NODALYS collects, structures and visualizes your data – no diagnosis, no judgment, no interpretation.",
+    disclaimer_main:"NODALYS is not a medical device and does not provide diagnosis or medical advice.",
+    disclaimer_cycle:"Important: NODALYS is not a contraceptive method and does not replace one. Do not rely on this app to prevent pregnancy.",
+    start:"Get started", step0:"WELCOME", step:"STEP 1", step2:"STEP 2", step3:"STEP 3", step4:"STEP 4", step5:"STEP 5", step5b:"STEP 5", step6:"STEP 6",
+    name_q:"What's your name?", name_hint:"So the app can greet you personally.", ph_name:"Name",
+    gender_q:"How should I address you?", gender_hint:"Some onboarding questions differ – e.g. about your cycle.",
+    optional_details:"OPTIONAL", ph_age:"Age", ph_height:"Height (cm)", ph_weight:"Weight (kg)",
+    consent_eyebrow:"IMPORTANT", consent_title:"Parental consent",
+    consent_body:"For users under 16, NODALYS needs a parent or guardian's consent before collecting personal data (GDPR Art. 8). Please hand over the device briefly if you're filling this in yourself.",
+    consent_name_label:"NAME OF PARENT/GUARDIAN",
+    consent_checkbox:"I am this child's parent/guardian and consent to NODALYS processing my child's (health) data.",
+    consent_note:"Prototype note: this is self-declared consent with no identity check – a real launch needs a verified process (e.g. a confirmation email to the parent).",
+    consent_confirm:"Confirm",
+    focus_q:"What would you like to understand better?", multi_hint:"Multiple selection possible.",
+    reason_q:"Why are you using NODALYS?",
+    meds_q_specific:"Do you take ADHD medication?", meds_hint_specific:"This is always optional and can be changed later.",
+    meds_q_general:"Do you take medication?", meds_hint_general:"Whether ADHD, epilepsy, depression or something else – anything is relevant to your patterns.",
+    medsetup_title:"Add medication", medsetup_hint:"Whatever name you know it by works – brand or active ingredient. No times needed.",
+    ph_wirkstoff:"Medication name (brand or active ingredient)", ph_dosis:"Dose (optional, e.g. 20mg)",
+    freq_label:"HOW OFTEN PER DAY?", add_more:"+ Save another medication", later_settings:"Add later in settings",
+    cycle_q:"Would you like to track your cycle?", cycle_hint:"Period, PMS symptoms, ovulation – documented neutrally, without judgment.",
+    hormonal_q:"Current hormonal status?", hormonal_hint:"Helps put your cycle in context – purely informational, no judgment.",
+    hormone_module_q:"Would you like to track general hormonal changes?", hormone_module_hint:"E.g. puberty, testosterone fluctuations, menopause – independent of the menstrual cycle.",
+    sync_title:"Connect health data", sync_body:"Connect Apple Health or Google Health Connect for automatic sleep and activity logging.",
+    sync_btn:"Sync health data", skip_now:"Skip for now",
+    step5c:"STEP 5", notif_q:"Would you like to receive reminders?", notif_hint:"Totally optional – you can change this anytime in settings.",
+    notif_meds_label:"Medication reminder (taken: yes/no)", notif_recap_label:"Evening recap",
+    notif_recap_desc:"A short summary of your day in the evening, about 1 minute to read.",
+    tailor_title:"Tailor your tracking", tailor_hint:"Up to 3 modules free – more with Premium.",
+    next:"Next",
+    ready_title:"All set.", ready_sub:"Your app now shows only what's relevant to you. You can change this anytime in settings.",
+    open_app:"Open app",
+    nav_today:"Today", nav_history:"History", nav_insights:"Insights", nav_settings:"Settings",
+    history_title:"Your history", week:"Week", month:"Month", months3:"3 months", days_short:"days", past7:"PAST 7 DAYS",
+    show_history:"Show history", jump_today:"Jump to today",
+    insights_title:"Your patterns", single_view:"Single", combo_view:"Combined", retro_log:"📅 Log missing days", show_table:"Table", show_chart:"Chart",
+    export_pdf:"PDF report", export_csv:"CSV export",
+    settings_title:"Settings", upgrade_premium:"Unlock Premium",
+    row_profile:"User profile", row_meds:"Medication", row_modules:"Tracking modules", row_privacy:"Data & privacy",
+    row_appearance:"Language & appearance", row_notifications:"Notifications", row_contact:"Contact & Q&A", row_emergency:"Help / Emergency",
+    mod_fokus:"Focus", mod_stimmung:"Mood", mod_energie:"Energy", mod_schlaf:"Sleep", mod_stress:"Stress", mod_medikation:"Medication", mod_zyklus:"Cycle", mod_hormone:"Hormones",
+    logcycle:"Log cycle", sleepq:"Sleep quality", hours:"hrs", poor:"Poor", fair:"Fair", good:"Good", great:"Great",
+  }
+};
+function L(de,en){ return state.lang==='de'?de:en; }
+const MAX_FREE_MODULES = 3;
+const HIST_DAYS = 90;
+const TODAY_KEY = '2026-07-24';
+
+/* ---------- module config ---------- */
+const MODULE_DEFS = [
+  {key:'fokus', icon:'🎯'}, {key:'stimmung', icon:'🙂'}, {key:'energie', icon:'⚡'},
+  {key:'schlaf', icon:'🌙'}, {key:'stress', icon:'🌊'}, {key:'medikation', icon:'💊'},
+  {key:'zyklus', icon:'🌸'}, {key:'hormone', icon:'🧬'},
+];
+/* Colorblind-safe palette (Okabe-Ito inspired) + distinct dash pattern + marker shape per module,
+   so factors stay distinguishable without relying on color alone. */
+const CHART_STYLE = {
+  fokus:    {color:'#0072B2', dash:'',        marker:'circle'},
+  stimmung: {color:'#D55E00', dash:'6,3',     marker:'square'},
+  energie:  {color:'#009E73', dash:'',        marker:'triangle'},
+  schlaf:   {color:'#0091C2', dash:'2,3',     marker:'circle'},
+  stress:   {color:'#E69F00', dash:'8,3,2,3', marker:'square'},
+  medikation:{color:'#CC79A7', dash:'',       marker:'diamond'},
+  zyklus:   {color:'#B8860B', dash:'6,3',     marker:'triangle'},
+  hormone:  {color:'#4A4A4A', dash:'2,3',     marker:'diamond'},
+};
+function genSeries(base, amp, days){
+  const arr=[];
+  for(let i=0;i<days;i++){
+    /* three overlaid waves (fast/medium/slow) so a 7-day window still shows visible day-to-day
+       movement instead of looking flat, while the 90-day view still reads as a smooth trend. */
+    const wave = Math.sin(i/2.3)*amp*0.3 + Math.sin(i/6)*amp*0.45 + Math.sin(i/23)*amp*0.25;
+    arr.push(Math.max(0, Math.round((base+wave)*10)/10));
+  }
+  return arr;
+}
+const SERIES90 = {
+  fokus: genSeries(6.5,2,HIST_DAYS), stimmung: genSeries(6,2.2,HIST_DAYS), energie: genSeries(5.5,2,HIST_DAYS),
+  schlaf: genSeries(7,1.3,HIST_DAYS), stress: genSeries(4.5,2,HIST_DAYS),
+  medikation: genSeries(0.9,0.15,HIST_DAYS).map(v=>v>0.5?1:0),
+  zyklus: (()=>{ const a=[]; for(let i=0;i<HIST_DAYS;i++) a.push((i%28)+1); return a; })(),
+  hormone: genSeries(5,1.5,HIST_DAYS)
+};
+/* Dose-change event: shown as an annotation marker on the medication chart, per feedback that
+   dose/medication changes must stay visible in the graph rather than only in raw data. */
+const MED_EVENTS = [{dayIndex: HIST_DAYS-14, text:{de:'Dosis erhöht auf 30mg', en:'Dose increased to 30mg'}}];
+function datesArray(){
+  const arr=[]; const end = new Date(2026,6,24);
+  for(let i=HIST_DAYS-1;i>=0;i--){ const d=new Date(end); d.setDate(end.getDate()-i); arr.push(d); }
+  return arr;
+}
+const DATES90 = datesArray();
+function fmtDate(d){ return d.toLocaleDateString(state.lang==='de'?'de-DE':'en-US', {day:'2-digit', month:'2-digit'}); }
+/* Demo history is generated once, but "today" should reflect what the person actually entered on
+   the Today screen just now – otherwise your own live input never shows up in Verlauf/Insights. */
+function liveSeries(key){
+  const arr = SERIES90[key] ? SERIES90[key].slice() : null;
+  if(!arr) return arr;
+  const log = state.dayLog[TODAY_KEY];
+  if(log){
+    const map = {fokus:'fokus', stimmung:'stimmung', energie:'energie', stress:'stress'};
+    let v = null;
+    if(map[key]!==undefined) v = Number(log.vals[map[key]]);
+    else if(key==='schlaf') v = Number(log.vals.schlafH);
+    if(v!==null && !isNaN(v)) arr[arr.length-1] = v;
+  }
+  return arr;
+}
+const DOW = {de:['Mo','Di','Mi','Do','Fr','Sa','So'], en:['Mon','Tue','Wed','Thu','Fri','Sat','Sun']};
+
+/* ---------- state ---------- */
+let state = {
+  lang:'de', dark:false, name:'', age:null, height:null, weight:null,
+  gender:null, focusAreas:[], reason:null, medsUse:null, cycleOptIn:null, hormonalStatus:null, hormoneOptIn:null, healthSync:false,
+  kidsMode:false, ageTier:null, guardianName:null, guardianConsent:false,
+  modules:{fokus:false, stimmung:false, energie:false, schlaf:false, stress:false, medikation:false, zyklus:false, hormone:false},
+  vals:{fokus:5, stimmung:5, energie:5, stress:5, schlafH:7, schlafQ:'good'},
+  meds:[], medsSetupTemp:[],
+  todayTags:[], dayLog:{}, quickCategory:'mood',
+  isPremium:false, trialDaysLeft:null,
+  notif:{medsReminder:false, eveningRecap:false},
+  histView:'week', insightView:'single', insightRange:7, insightMode:'chart', insightTab:null, insightCombo:[],
+  historyExpanded:false, calMonthOffset:0
+};
+
+/* ---------- navigation ---------- */
+const MAIN_SCREENS = ['s-today','s-insights','s-settings'];
+let navHistory = [];
+function switchScreen(id){
+  document.querySelectorAll('.screen').forEach(s=>s.classList.remove('active'));
+  document.getElementById(id).classList.add('active');
+  updateBackBtn(id);
+}
+function updateBackBtn(id){
+  const btn = document.getElementById('backBtn');
+  if(id==='s-welcome' || MAIN_SCREENS.includes(id) || navHistory.length===0){ btn.classList.add('hidden'); }
+  else { btn.classList.remove('hidden'); }
+}
+/* go() remembers where we came from so onboarding screens can offer a Back button –
+   useful if someone is unsure and wants to revise an earlier answer. */
+function go(id){
+  const current = document.querySelector('.screen.active');
+  if(current && current.id!==id) navHistory.push(current.id);
+  switchScreen(id);
+}
+function goBack(){
+  if(navHistory.length===0) return;
+  const prev = navHistory.pop();
+  switchScreen(prev);
+}
+function showMain(id, btn){
+  document.querySelectorAll('.screen').forEach(s=>s.classList.remove('active'));
+  document.getElementById(id).classList.add('active');
+  document.querySelectorAll('.nav-btn').forEach(b=>b.classList.remove('active'));
+  if(btn) btn.classList.add('active');
+  updateBackBtn(id);
+  if(id==='s-today') renderToday();
+  if(id==='s-insights') renderInsights();
+  if(id==='s-settings') renderSettingsHome();
+}
+function enterApp(){
+  navHistory = [];
+  document.getElementById('bottomnav').classList.remove('hidden');
+  showMain('s-today', document.querySelector('.nav-btn'));
+}
+
+/* ---------- onboarding builders ---------- */
+function saveName(){
+  const v = document.getElementById('inpName').value.trim();
+  state.name = v || 'Zoe';
+  go('s-profile');
+}
+function buildChoiceList(containerId, items, stateKey, multi){
+  const el = document.getElementById(containerId);
+  el.innerHTML = '';
+  items.forEach(it=>{
+    const d = document.createElement('div');
+    const isSel = multi ? state[stateKey].includes(it.value) : state[stateKey]===it.value;
+    d.className='choice'+(isSel?' selected':'');
+    d.innerHTML = `<b>${it.label}</b>${it.sub?`<small>${it.sub}</small>`:''}`;
+    d.onclick = ()=>{
+      if(multi){
+        const arr = state[stateKey];
+        const i = arr.indexOf(it.value);
+        if(i>-1) arr.splice(i,1); else arr.push(it.value);
+        d.classList.toggle('selected');
+      } else {
+        state[stateKey] = it.value;
+        [...el.children].forEach(c=>c.classList.remove('selected'));
+        d.classList.add('selected');
+      }
+    };
+    el.appendChild(d);
+  });
+}
+function buildGender(){
+  buildChoiceList('genderChoices', [
+    {label:L('Weiblich','Female'), value:'w'}, {label:L('Männlich','Male'), value:'m'},
+    {label:L('Divers','Non-binary'), value:'d'}, {label:L('Keine Angabe','Prefer not to say'), value:'n'},
+  ], 'gender', false);
+}
+/* Under 16, GDPR Art. 8 requires a parent/guardian's consent before we process any personal data –
+   this applies in Germany specifically since the legislator kept the default 16-year threshold
+   (didn't lower it to 13 like some other member states). So age is the one field in this screen
+   that isn't just informational: it can redirect the whole flow. Two age tiers below 16 because
+   puberty/cycle relevance differs a lot between e.g. a 9-year-old and a 14-year-old. */
+function saveProfileDetails(){
+  state.age = document.getElementById('inpAge').value || null;
+  state.height = document.getElementById('inpHeight').value || null;
+  state.weight = document.getElementById('inpWeight').value || null;
+  const ageNum = parseInt(state.age,10);
+  if(!isNaN(ageNum) && ageNum < 16){
+    state.kidsMode = true;
+    state.ageTier = ageNum < 12 ? 'young' : 'teen';
+    document.getElementById('inpGuardianName').value='';
+    document.getElementById('chkGuardianConsent').checked=false;
+    updateConsentBtn();
+    go('s-parentalconsent');
+  } else {
+    state.kidsMode = false; state.ageTier = null;
+    document.body.classList.remove('kids-mode');
+    buildFocus(); /* rebuild now that gender is known, so Cycle is correctly hidden for men */
+    go('s-focus');
+  }
+}
+function updateConsentBtn(){
+  const ok = document.getElementById('chkGuardianConsent').checked;
+  document.getElementById('consentConfirmBtn').disabled = !ok;
+}
+function confirmParentalConsent(){
+  state.guardianName = document.getElementById('inpGuardianName').value.trim() || null;
+  state.guardianConsent = document.getElementById('chkGuardianConsent').checked;
+  if(!state.guardianConsent) return;
+  document.body.classList.add('kids-mode');
+  buildFocus();
+  go('s-focus');
+}
+function buildFocus(){
+  const el = document.getElementById('focusPills');
+  el.innerHTML='';
+  let opts = [
+    ['fokus', L('Fokus & Konzentration','Focus & concentration')], ['stimmung', L('Stimmung','Mood')],
+    ['energie', L('Energie','Energy')], ['schlaf', L('Schlaf','Sleep')], ['stress', L('Stress','Stress')],
+    ['medikation', L('Medikation','Medication')], ['zyklus', L('Zyklus','Cycle')], ['hormone', L('Hormone','Hormones')],
+  ];
+  /* Cycle tracking is never relevant for men – the general Hormone module (puberty, testosterone,
+     menopause...) is offered to everyone instead and stays in the list. Also not relevant for the
+     younger kids tier (pre-puberty); the 12–15 tier keeps it since periods can start in that range. */
+  if(state.gender==='m' || (state.kidsMode && state.ageTier==='young')) opts = opts.filter(([val])=>val!=='zyklus');
+  opts.forEach(([val,label])=>{
+    const p = document.createElement('div');
+    p.className='pill'+(state.focusAreas.includes(val)?' selected':''); p.textContent = label;
+    p.onclick = ()=>{
+      const i = state.focusAreas.indexOf(val);
+      if(i>-1) state.focusAreas.splice(i,1); else state.focusAreas.push(val);
+      p.classList.toggle('selected');
+    };
+    el.appendChild(p);
+  });
+}
+function buildReason(){
+  buildChoiceList('reasonChoices', [
+    {label:L('Ich habe ADHS','I have ADHD'), value:'has'},
+    {label:L('Ich vermute ADHS','I suspect ADHD'), value:'suspect'},
+    {label:L('Ich befinde mich in Abklärung','I am in the diagnostic process'), value:'process'},
+    {label:L('Ich möchte meine Muster allgemein besser verstehen','I want to understand my patterns in general'), value:'general'},
+  ], 'reason', false);
+}
+function buildMeds(){
+  buildChoiceList('medsChoices', [
+    {label:L('Ja','Yes'), value:'yes'}, {label:L('Nein','No'), value:'no'},
+    {label:L('Manchmal','Sometimes'), value:'sometimes'}, {label:L('Keine Angabe','Prefer not to say'), value:'na'},
+  ], 'medsUse', false);
+}
+/* Medication question is only ADHS-specific if the person already identifies as diagnosed ('has').
+   For suspicion/in-process/general, we ask a neutral general medication question instead – they may
+   be on medication for something else entirely (epilepsy, depression, etc.). */
+function medsIsSpecific(){ return state.reason==='has'; }
+function goToMeds(){
+  document.getElementById('medsQTitle').textContent = medsIsSpecific() ? DICT[state.lang].meds_q_specific : DICT[state.lang].meds_q_general;
+  document.getElementById('medsQHint').textContent = medsIsSpecific() ? DICT[state.lang].meds_hint_specific : DICT[state.lang].meds_hint_general;
+  go('s-meds');
+}
+function onMedsNext(){
+  state.modules.medikation = (state.medsUse==='yes' || state.medsUse==='sometimes');
+  if(state.modules.medikation){ state.medsSetupTemp=[]; renderMedsetupList(); go('s-medsetup'); }
+  else { proceedAfterMeds(); }
+}
+function addMedSetupEntry(){
+  const w = document.getElementById('inpWirkstoff').value.trim();
+  if(!w){ alert(L('Bitte einen Namen eingeben.','Please enter a name.')); return; }
+  const d = document.getElementById('inpDosis').value.trim();
+  const freq = parseInt(document.getElementById('inpFrequency').value,10) || 1;
+  state.medsSetupTemp.push({id:'m'+Date.now()+Math.random(), name:w, dose:d, timesPerDay:freq, taken:false, takenCount:0});
+  document.getElementById('inpWirkstoff').value=''; document.getElementById('inpDosis').value='';
+  renderMedsetupList();
+}
+function freqLabel(n){ return n>=4? L('4x+ täglich','4x+ daily') : `${n}x ${L('täglich','daily')}`; }
+function renderMedsetupList(){
+  document.getElementById('medsetupList').innerHTML = state.medsSetupTemp.map(m=>
+    `<div class="rowline"><span>${m.name}${m.dose?' · '+m.dose:''} · ${freqLabel(m.timesPerDay)}</span></div>`).join('');
+}
+function finishMedSetup(){
+  const w = document.getElementById('inpWirkstoff').value.trim();
+  if(w){ addMedSetupEntry(); }
+  state.meds = state.medsSetupTemp.slice();
+  proceedAfterMeds();
+}
+/* Cycle question only shown for women/non-binary users; men skip straight to the general hormone module question. */
+function proceedAfterMeds(){
+  if(state.gender==='m' || (state.kidsMode && state.ageTier==='young')){
+    state.cycleOptIn='no'; state.modules.zyklus=false; goToHormoneModule();
+  } else { go('s-cycle'); buildCycle(); }
+}
+function buildCycle(){
+  buildChoiceList('cycleChoices', [
+    {label:L('Ja','Yes'), value:'yes'}, {label:L('Nein','No'), value:'no'}, {label:L('Später','Later'), value:'later'},
+  ], 'cycleOptIn', false);
+}
+function finishCycleStep(){
+  state.modules.zyklus = (state.cycleOptIn==='yes');
+  /* Contraception/pregnancy/perimenopause context isn't applicable to minors – skip straight to the hormone module question for kids. */
+  if(state.cycleOptIn==='yes' && !state.kidsMode){ go('s-hormonal'); buildHormonal(); }
+  else { goToHormoneModule(); }
+}
+function buildHormonal(){
+  buildChoiceList('hormonalChoices', [
+    {label:L('Verhütung','Contraception'), value:'contraception'},
+    {label:L('Schwangerschaft','Pregnancy'), value:'pregnancy'},
+    {label:L('Perimenopause','Perimenopause'), value:'perimenopause'},
+    {label:L('Keiner','None'), value:'none'},
+  ], 'hormonalStatus', false);
+}
+/* Separate, gender-independent module: hormonal changes beyond the menstrual cycle (puberty, testosterone, menopause...).
+   The example text is tailored by gender – menopause isn't a relevant example for men. */
+function buildHormoneModuleChoice(){
+  buildChoiceList('hormoneModuleChoices', [
+    {label:L('Ja','Yes'), value:'yes'}, {label:L('Nein','No'), value:'no'}, {label:L('Später','Later'), value:'later'},
+  ], 'hormoneOptIn', false);
+}
+function hormoneModuleHintText(){
+  if(state.kidsMode) return L('Z.B. körperliche Veränderungen in der Pubertät.','E.g. physical changes during puberty.');
+  if(state.gender==='m') return L('Z.B. Pubertät, Testosteron-Schwankungen oder andere hormonelle Veränderungen – unabhängig vom Zyklus.','E.g. puberty, testosterone fluctuations or other hormonal changes – independent of the menstrual cycle.');
+  return L('Z.B. Pubertät, Wechseljahre oder andere hormonelle Veränderungen – unabhängig vom Zyklus.','E.g. puberty, menopause or other hormonal changes – independent of the menstrual cycle.');
+}
+function goToHormoneModule(){
+  document.getElementById('hormoneModuleHint').textContent = hormoneModuleHintText();
+  go('s-hormonemodule'); buildHormoneModuleChoice();
+}
+function finishHormoneModuleStep(){
+  state.modules.hormone = (state.hormoneOptIn==='yes');
+  go('s-healthsync');
+}
+
+/* ---------- tailor tracking (3-module free cap) ---------- */
+function activeCount(){ return MODULE_DEFS.filter(m=>state.modules[m.key]).length; }
+function canEnable(key){ if(state.modules[key]) return true; if(state.isPremium) return true; return activeCount() < MAX_FREE_MODULES; }
+function initTailorDefaults(){
+  let picks = [];
+  if(state.modules.medikation) picks.push('medikation');
+  if(state.modules.zyklus) picks.push('zyklus');
+  if(state.modules.hormone) picks.push('hormone');
+  state.focusAreas.forEach(f=>{ if(MODULE_DEFS.find(m=>m.key===f) && !picks.includes(f)) picks.push(f); });
+  if(picks.length===0) picks=['fokus','stimmung'];
+  MODULE_DEFS.forEach(m=>state.modules[m.key]=false);
+  picks.slice(0,MAX_FREE_MODULES).forEach(k=>state.modules[k]=true);
+}
+function renderTailor(){
+  const el = document.getElementById('tailorList');
+  const count = activeCount();
+  el.innerHTML = `<div class="label">${L('MODULE','MODULES')} (${count}/${state.isPremium?L('unbegrenzt','unlimited'):MAX_FREE_MODULES})</div>` +
+    MODULE_DEFS.map(m=>{
+      const on = state.modules[m.key];
+      const locked = !on && !canEnable(m.key);
+      return `<div class="rowline ${locked?'locked-row':''}"><span>${m.icon} ${DICT[state.lang]['mod_'+m.key]} ${locked?'<span class=\"badge-pro\">PRO</span>':''}</span>
+      <label class="switch"><input type="checkbox" ${on?'checked':''} onchange="toggleTailor('${m.key}',this)" aria-label="${DICT[state.lang]['mod_'+m.key]}"><span class="slider-track"></span></label></div>`;
+    }).join('');
+}
+function toggleTailor(key, input){
+  if(input.checked){
+    if(!canEnable(key)){
+      input.checked=false;
+      openPaywall(L('Du hast bereits 3 Module aktiv. Mit Premium kannst du beliebig viele gleichzeitig tracken.','You already have 3 active modules. With Premium you can track as many as you like at once.'));
+      return;
+    }
+    state.modules[key]=true;
+  } else { state.modules[key]=false; }
+  renderTailor();
+}
+function buildReadySummary(){
+  const active = MODULE_DEFS.filter(m=>state.modules[m.key]);
+  const namesKey = active.map(m=>DICT[state.lang]['mod_'+m.key]).join(', ');
+  document.getElementById('readySummary').innerHTML =
+    `<div class="label">${L('AKTIVE MODULE','ACTIVE MODULES')}</div><div style="font-size:0.875rem;">${namesKey || '–'}</div>`;
+}
+
+/* ---------- language / dark mode ---------- */
+function applyI18n(){
+  document.querySelectorAll('[data-i18n]').forEach(el=>{
+    const k = el.dataset.i18n;
+    if(DICT[state.lang][k]!==undefined) el.textContent = DICT[state.lang][k];
+  });
+  document.querySelectorAll('[data-i18n-placeholder]').forEach(el=>{
+    const k = el.dataset.i18nPlaceholder;
+    if(DICT[state.lang][k]!==undefined) el.placeholder = DICT[state.lang][k];
+  });
+  document.getElementById('langDE').classList.toggle('active', state.lang==='de');
+  document.getElementById('langEN').classList.toggle('active', state.lang==='en');
+}
+function setLang(l){
+  state.lang = l; closeModal(); applyI18n();
+  buildGender(); buildFocus(); buildReason(); buildMeds(); buildCycle(); buildHormonal(); buildHormoneModuleChoice();
+  if(document.getElementById('s-meds').classList.contains('active')) goToMeds();
+  if(document.getElementById('s-hormonemodule').classList.contains('active')) document.getElementById('hormoneModuleHint').textContent = hormoneModuleHintText();
+  if(document.getElementById('s-tailor').classList.contains('active')) renderTailor();
+  if(document.getElementById('s-today').classList.contains('active')) renderToday();
+  if(document.getElementById('s-insights').classList.contains('active')) renderInsights();
+  if(document.getElementById('s-settings').classList.contains('active')) renderSettingsHome();
+}
+function toggleDark(v){ state.dark=v; document.body.classList.toggle('dark', v); }
+
+/* ---------- TODAY ---------- */
+function renderToday(){
+  const d = new Date();
+  const dateFmt = d.toLocaleDateString(state.lang==='de'?'de-DE':'en-US', {weekday:'long', month:'long', day:'numeric'});
+  document.getElementById('todayDate').textContent = dateFmt.toUpperCase();
+  const hour = d.getHours();
+  const greet = hour<12? L('Guten Morgen','Good morning') : hour<18? L('Guten Tag','Good afternoon') : L('Guten Abend','Good evening');
+  document.getElementById('todayGreeting').textContent = `${greet}, ${state.name || 'Zoe'}`;
+
+  let html = '';
+  if(state.modules.medikation){
+    if(state.meds.length===0){
+      html += `<div class="card"><div class="label">💊 ${L('MEDIKATION','MEDICATION')}</div>
+        <p style="font-size:0.875rem;color:var(--ink-soft);margin:0 0 10px;">${L('Noch kein Medikament hinterlegt.','No medication added yet.')}</p>
+        <button class="btn btn-ghost btn-sm" onclick="showMain('s-settings', document.querySelectorAll('.nav-btn')[2]); openSettingsSection('meds');">${L('+ Hinzufügen','+ Add')}</button>
+      </div>`;
+    } else {
+      state.meds.forEach(m=>{
+        const freq = m.timesPerDay||1;
+        if(freq<=1){
+          html += `<div class="med-card"><span><b>${m.name}</b>${m.dose?` · ${m.dose}`:''}</span>
+          <button class="checkbtn ${m.taken?'done':''}" onclick="toggleMedToday('${m.id}')" aria-label="${L('Als genommen markieren','Mark as taken')}">✓</button></div>`;
+        } else {
+          const count = m.takenCount||0;
+          html += `<div class="med-card"><span><b>${m.name}</b>${m.dose?` · ${m.dose}`:''}<br><small style="opacity:.85;">${count}/${freq} ${L('heute genommen','taken today')}</small></span>
+          <span style="display:flex;gap:6px;">
+            <button class="checkbtn" onclick="decMedToday('${m.id}')" aria-label="${L('Eine weniger','One less')}">–</button>
+            <button class="checkbtn ${count>=freq?'done':''}" onclick="incMedToday('${m.id}')" aria-label="${L('Eine mehr genommen','One more taken')}">+</button>
+          </span></div>`;
+        }
+      });
+    }
+  }
+  if(state.modules.zyklus){
+    let tip = `<div class="tip-banner">⚠️ ${DICT[state.lang].disclaimer_cycle}</div>`;
+    if(state.hormonalStatus==='contraception') tip += `<div class="tip-banner">${L('Verhütung kann den natürlichen Zyklus überlagern.','Contraception may mask your natural cycle.')}</div>`;
+    html += `<div class="card"><div class="row"><span style="font-weight:700;">${L('Zyklus: Tag','Cycle: Day')} 14</span>
+      <a class="linkline" style="margin:0;" onclick="logCycle()">${DICT[state.lang].logcycle}</a></div>${tip}</div>`;
+  }
+  if(state.modules.hormone){
+    html += `<div class="card"><div class="label">🧬 ${DICT[state.lang].mod_hormone}</div>
+      <div class="row"><span>${L('Heutige Schwankung','Fluctuation today')}</span><span class="val">${state.vals.stimmung}/10</span></div>
+      <p style="font-size:0.78rem;color:var(--ink-soft);margin:6px 0 0;">${L('Rein beobachtend – z.B. Pubertät, Wechseljahre, allgemeine Hormonschwankungen.','Purely observational – e.g. puberty, menopause, general hormonal changes.')}</p>
+    </div>`;
+  }
+  if(state.modules.fokus || state.modules.stimmung){
+    html += `<div class="card"><div class="label">${L('KOGNITIV','COGNITIVE')}</div>`;
+    if(state.modules.fokus) html += sliderRow('fokus', DICT[state.lang].mod_fokus);
+    if(state.modules.stimmung) html += sliderRow('stimmung', DICT[state.lang].mod_stimmung);
+    html += `</div>`;
+  }
+  if(state.modules.energie || state.modules.stress){
+    html += `<div class="card"><div class="label">${L('KÖRPER','BODY')}</div>`;
+    if(state.modules.energie) html += sliderRow('energie', DICT[state.lang].mod_energie);
+    if(state.modules.stress) html += sliderRow('stress', DICT[state.lang].mod_stress);
+    html += `</div>`;
+  }
+  if(state.modules.schlaf){
+    html += `<div class="card"><div class="label">🌙 ${DICT[state.lang].mod_schlaf}</div>
+      <div class="stepper">
+        <button class="stepbtn" onclick="adjSleep(-0.5)" aria-label="${L('Weniger Stunden','Fewer hours')}">–</button>
+        <div class="steptext">${state.vals.schlafH.toFixed(1)} <span style="font-size:0.875rem;color:var(--ink-soft);">${DICT[state.lang].hours}</span></div>
+        <button class="stepbtn" onclick="adjSleep(0.5)" aria-label="${L('Mehr Stunden','More hours')}">+</button>
+      </div>
+      <div class="label" style="margin-top:10px;">${DICT[state.lang].sleepq}</div>
+      <div class="emoji4" id="sleepQ">
+        ${['poor','fair','good','great'].map(q=>`<div class="opt ${state.vals.schlafQ===q?'selected':''}" onclick="setSleepQ('${q}')">${q==='poor'?'☹️':q==='fair'?'😐':q==='good'?'🙂':'😄'}<div class="tlabel">${DICT[state.lang][q]}</div></div>`).join('')}
+      </div>
+    </div>`;
+  }
+  html += `<div class="card"><div class="label">QUICK TRACK</div><div id="quickTags"></div></div>`;
+  document.getElementById('todayCards').innerHTML = html;
+  renderQuickTags();
+}
+/* Quick Track is grouped by theme, shown as horizontal category tabs so the card doesn't turn into
+   a huge wall of chips – pick a category (e.g. "Alltag"), then tap the relevant tags inside it.
+   Side-effect / cycle categories only appear once the matching module is active. Substance use
+   (alcohol, cannabis, nicotine, caffeine) is tracked neutrally, without judgment – relevant for many
+   people with ADHD and deliberately phrased without shame. */
+function tagGroups(){
+  const groups = [];
+  groups.push({key:'mood', label:L('Stimmung','Mood'), items:[
+    ['happy', L('Gut gelaunt','Happy')], ['anxious', L('Ängstlich','Anxious')],
+    ['irritable', L('Gereizt','Irritable')], ['calm', L('Ruhig','Calm')], ['overwhelmed', L('Überfordert','Overwhelmed')],
+  ]});
+  groups.push({key:'cognitive', label:L('Kognitiv','Cognitive'), items:[
+    ['focused', L('Fokussiert','Focused')], ['distracted', L('Zerstreut','Distracted')], ['forgetful', L('Vergesslich','Forgetful')],
+  ]});
+  groups.push({key:'physical', label:L('Körperlich','Physical'), items:[
+    ['fatigue', L('Erschöpft','Fatigue')], ['energetic', L('Energiegeladen','Energetic')], ['tense', L('Verspannt','Tense')],
+  ]});
+  if(state.modules.medikation){
+    groups.push({key:'sideeffects', label:L('Nebenwirkungen','Side effects'), items:[
+      ['headache', L('Kopfschmerzen','Headache')], ['nausea', L('Übelkeit','Nausea')], ['appetite_loss', L('Appetitlosigkeit','Loss of appetite')],
+      ['racing_heart', L('Herzrasen','Racing heart')], ['dizzy', L('Schwindel','Dizziness')], ['dry_mouth', L('Mundtrockenheit','Dry mouth')],
+      ['sleep_issues', L('Schlafstörung','Sleep trouble')],
+    ]});
+  }
+  if(state.modules.zyklus){
+    groups.push({key:'cycle', label:L('Zyklus','Cycle'), items:[
+      ['cramps', L('Krämpfe','Cramps')], ['bloating', L('Wassereinlagerung','Bloating')], ['mood_swing', L('Stimmungsschwankung','Mood swing')],
+    ]});
+  }
+  /* Substances category is not shown in Kids-Mode – not relevant/appropriate for users under 16. */
+  if(!state.kidsMode){
+    groups.push({key:'substances', label:L('Substanzen','Substances'), items:[
+      ['alcohol', L('Alkohol','Alcohol')], ['cannabis', L('Cannabis','Cannabis')], ['nicotine', L('Nikotin','Nicotine')],
+      ['caffeine', L('Koffein (mehr als sonst)','Caffeine (more than usual)')], ['other_substance', L('Andere Substanz','Other substance')],
+    ]});
+  }
+  groups.push({key:'everyday', label:L('Alltag','Everyday'), items:[
+    ['good_day', L('Guter Tag','Good day')], ['hard_day', L('Schwieriger Tag','Hard day')],
+    ['sensory_overload', L('Reizüberflutung','Sensory overload')], ['social_stress', L('Sozialer Stress','Social stress')],
+  ]});
+  return groups;
+}
+function tagLabel(key){
+  for(const g of tagGroups()){ const found = g.items.find(([k])=>k===key); if(found) return found[1]; }
+  return key;
+}
+function renderQuickTags(){
+  const el = document.getElementById('quickTags');
+  if(!el) return;
+  const groups = tagGroups();
+  if(!groups.find(g=>g.key===state.quickCategory)) state.quickCategory = groups[0].key;
+  const active = groups.find(g=>g.key===state.quickCategory);
+  el.innerHTML = `<div class="tabs-scroll">${groups.map(g=>
+      `<div class="tabpill ${state.quickCategory===g.key?'active':''}" onclick="selectQuickCategory('${g.key}')">${g.label}</div>`).join('')}</div>
+    <div class="pillwrap">${active.items.map(([key,label])=>
+      `<span class="tagchip ${state.todayTags.includes(key)?'on':''}" data-key="${key}" onclick="toggleTag('${key}')">${label}</span>`).join('')}
+      <span class="tagchip dashed" onclick="addCustomTag()">+ ${L('Eigenen Tag','Custom tag')}</span></div>`;
+}
+function selectQuickCategory(key){ state.quickCategory=key; renderQuickTags(); }
+function toggleTag(key){
+  const wasOn = state.todayTags.includes(key);
+  const i = state.todayTags.indexOf(key);
+  if(i>-1) state.todayTags.splice(i,1); else state.todayTags.push(key);
+  renderQuickTags();
+  const chip = document.querySelector(`.tagchip[data-key="${key}"]`);
+  if(chip){ chip.classList.add('justsaved'); setTimeout(()=>chip.classList.remove('justsaved'),650); }
+  showToast(wasOn? L('Entfernt','Removed') : L('Gespeichert ✓','Saved ✓'));
+  saveTodayLog();
+}
+function addCustomTag(){
+  const t = prompt(L('Eigenen Tag benennen:','Name your custom tag:'));
+  if(t){ state.todayTags.push(t); renderQuickTags(); showToast(L('Gespeichert ✓','Saved ✓')); saveTodayLog(); }
+}
+function saveTodayLog(){ state.dayLog[TODAY_KEY] = {tags: state.todayTags.slice(), vals: Object.assign({}, state.vals)}; }
+function showToast(msg){
+  const t = document.getElementById('toast');
+  t.textContent = msg; t.classList.add('show');
+  clearTimeout(window._toastTimer);
+  window._toastTimer = setTimeout(()=>t.classList.remove('show'), 1600);
+}
+function sliderRow(key, label){
+  return `<div style="margin-bottom:14px;"><div class="row"><span>${label}</span><span class="val" id="val-${key}">${state.vals[key]}/10</span></div>
+    <input type="range" min="1" max="10" value="${state.vals[key]}" oninput="liveSlide('${key}',this.value)" onchange="confirmSlide('${key}')" aria-label="${label}">
+    <div class="scalehints"><span>1</span><span>10</span></div></div>`;
+}
+function liveSlide(key, value){
+  state.vals[key] = value;
+  const el = document.getElementById('val-'+key);
+  if(el) el.textContent = value+'/10';
+}
+/* Fires once when the user releases the slider (not on every drag tick) – confirms the entry
+   was registered, and only then persists it, so we're not spamming a toast on every pixel of drag. */
+function confirmSlide(key){
+  saveTodayLog();
+  showToast(L('Gespeichert ✓','Saved ✓'));
+  const el = document.getElementById('val-'+key);
+  if(el){ el.classList.add('justsaved'); setTimeout(()=>el.classList.remove('justsaved'),650); }
+}
+function adjSleep(delta){ state.vals.schlafH = Math.max(0, Math.min(14, state.vals.schlafH+delta)); renderToday(); saveTodayLog(); }
+function setSleepQ(q){ state.vals.schlafQ=q; renderToday(); saveTodayLog(); }
+function toggleMedToday(id){ const m = state.meds.find(x=>x.id===id); if(m){ m.taken=!m.taken; renderToday(); showToast(m.taken?L('Als genommen markiert ✓','Marked as taken ✓'):L('Zurückgesetzt','Reset')); } }
+function incMedToday(id){ const m = state.meds.find(x=>x.id===id); if(m){ m.takenCount = Math.min((m.timesPerDay||1), (m.takenCount||0)+1); renderToday(); showToast(`${m.takenCount}/${m.timesPerDay} ✓`); } }
+function decMedToday(id){ const m = state.meds.find(x=>x.id===id); if(m){ m.takenCount = Math.max(0, (m.takenCount||0)-1); renderToday(); } }
+function logCycle(){ openModal(`<h3>${DICT[state.lang].logcycle}</h3><p style="font-size:0.875rem;">${L('Demo: Zyklustag 14 gespeichert. Symptome (PMS, Krämpfe, Eisprung) können frei ergänzt werden.','Demo: cycle day 14 saved. Symptoms (PMS, cramps, ovulation) can be added freely.')}</p><button class="btn btn-primary" onclick="closeModal()">OK</button>`); }
+
+/* ---------- HISTORY ---------- */
+function setHistView(v, btn){
+  state.histView=v;
+  document.querySelectorAll('#historySection .segctl button').forEach(b=>b.classList.remove('active'));
+  btn.classList.add('active');
+  document.getElementById('histWeek').style.display = v==='week'?'block':'none';
+  document.getElementById('histMonth').style.display = v==='month'?'block':'none';
+}
+function toggleHistorySection(){
+  state.historyExpanded = !state.historyExpanded;
+  document.getElementById('historySection').style.display = state.historyExpanded ? 'block':'none';
+  document.getElementById('historyToggleBtn').querySelector('span').textContent = state.historyExpanded ? L('Verlauf ausblenden','Hide history') : L('Verlauf anzeigen','Show history');
+  if(state.historyExpanded) renderHistory();
+}
+function shiftMonth(delta){
+  /* capped so you can't scroll into the future, and limited to a year of demo history back so
+     nobody gets stuck clicking "previous" forever – jump-to-today link covers the rest. */
+  state.calMonthOffset = Math.max(-11, Math.min(0, state.calMonthOffset+delta));
+  renderHistory();
+}
+function goToCurrentMonth(){ state.calMonthOffset = 0; renderHistory(); }
+function renderHistory(){
+  const dow = DOW[state.lang];
+  const active = MODULE_DEFS.filter(m=>state.modules[m.key] && SERIES90[m.key]);
+  const primary = active[0]? active[0].key : 'stimmung';
+  const series = liveSeries(primary).slice(-7);
+  document.getElementById('weekCircles').innerHTML = dow.map((d,i)=>
+    `<div class="daycircle"><div class="dot">${Math.round(series[i])}</div>${d}</div>`).join('');
+
+  const grid = document.getElementById('calGrid');
+  const monthNames = state.lang==='de'
+    ? ['Januar','Februar','März','April','Mai','Juni','Juli','August','September','Oktober','November','Dezember']
+    : ['January','February','March','April','May','June','July','August','September','October','November','December'];
+  const now = new Date(2026,6,24);
+  const viewDate = new Date(now.getFullYear(), now.getMonth()+state.calMonthOffset, 1);
+  const isCurrentMonth = state.calMonthOffset===0;
+  document.getElementById('monthLabel').textContent = `${monthNames[viewDate.getMonth()].toUpperCase()} ${viewDate.getFullYear()}`;
+  document.getElementById('nextMonthBtn').disabled = isCurrentMonth;
+  document.getElementById('nextMonthBtn').style.opacity = isCurrentMonth ? .35 : 1;
+  document.getElementById('jumpTodayLink').style.display = isCurrentMonth ? 'none':'block';
+  let html = dow.map(d=>`<div class="dow">${d}</div>`).join('');
+  const firstDow = (new Date(viewDate.getFullYear(), viewDate.getMonth(),1).getDay()+6)%7;
+  const daysInMonth = new Date(viewDate.getFullYear(), viewDate.getMonth()+1,0).getDate();
+  for(let i=0;i<firstDow;i++) html+=`<div></div>`;
+  for(let day=1; day<=daysInMonth; day++){
+    const isToday = isCurrentMonth && day===now.getDate();
+    const hasEntry = isCurrentMonth ? day<=now.getDate() : true; /* past months: demo-filled */
+    const todayTagCount = (isToday && state.dayLog[TODAY_KEY]) ? state.dayLog[TODAY_KEY].tags.length : 0;
+    html += `<div class="day ${hasEntry?'has':''} ${isToday?'today':''}" onclick="dayModal(${day})">${day}${todayTagCount?`<span class="tagbadge">${todayTagCount}</span>`:''}</div>`;
+  }
+  grid.innerHTML = html;
+}
+function dayModal(day){
+  const now = new Date(2026,6,24);
+  if(day===now.getDate() && state.dayLog[TODAY_KEY]){
+    const log = state.dayLog[TODAY_KEY];
+    const tagsHtml = log.tags.length ? log.tags.map(t=>`<span class="tagchip on" style="cursor:default;">${tagLabel(t)}</span>`).join('') : `<span style="color:var(--ink-soft);font-size:0.8125rem;">${L('Keine Tags','No tags')}</span>`;
+    openModal(`<h3>${L('Heute','Today')}</h3>
+      <p style="font-size:0.875rem;">${L('Fokus','Focus')}: ${log.vals.fokus}/10 · ${L('Stimmung','Mood')}: ${log.vals.stimmung}/10 · ${L('Schlaf','Sleep')}: ${Number(log.vals.schlafH).toFixed(1)} ${DICT[state.lang].hours}</p>
+      <div class="pillwrap">${tagsHtml}</div>
+      <button class="btn btn-primary" style="margin-top:10px;" onclick="closeModal()">OK</button>`);
+    return;
+  }
+  openModal(`<h3>${L('Tag','Day')} ${day}</h3>
+    <p style="font-size:0.875rem;">${L('Fokus','Focus')}: ${1+ (day%5)+4}/10 · ${L('Stimmung','Mood')}: ${1+(day%4)+4}/10 · ${L('Schlaf','Sleep')}: ${(6+ (day%3)).toFixed(1)} ${DICT[state.lang].hours}</p>
+    <button class="btn btn-primary" onclick="closeModal()">OK</button>`);
+}
+
+/* ---------- INSIGHTS ---------- */
+function markerSvg(shape, x, y, color){
+  if(shape==='circle') return `<circle cx="${x}" cy="${y}" r="3.2" fill="${color}"/>`;
+  if(shape==='square') return `<rect x="${x-3}" y="${y-3}" width="6" height="6" fill="${color}"/>`;
+  if(shape==='triangle') return `<polygon points="${x},${y-4} ${x-4},${y+3.2} ${x+4},${y+3.2}" fill="${color}"/>`;
+  return `<polygon points="${x},${y-4.2} ${x+4.2},${y} ${x},${y+4.2} ${x-4.2},${y}" fill="${color}"/>`; /* diamond */
+}
+function tickIndices(n){
+  const targetTicks = n<=7? n : n<=30? 6 : 6;
+  const step = Math.max(1, Math.round((n-1)/(targetTicks-1)));
+  const idx=[]; for(let i=0;i<n;i+=step) idx.push(i);
+  if(idx[idx.length-1]!==n-1) idx.push(n-1);
+  return idx;
+}
+function buildAxis(dates, w, h, marginBottom){
+  const n = dates.length;
+  const ticks = tickIndices(n);
+  let svg = `<line x1="0" y1="${h-marginBottom}" x2="${w}" y2="${h-marginBottom}" stroke="var(--sand-border)" stroke-width="1"/>`;
+  ticks.forEach(i=>{
+    const x = n===1?0:i*(w/(n-1));
+    svg += `<text x="${x}" y="${h-2}" font-size="9" fill="#7A7263" text-anchor="${i===0?'start':i===n-1?'end':'middle'}">${fmtDate(dates[i])}</text>`;
+  });
+  return svg;
+}
+function medEventMarker(dates, w, h, marginBottom, startIdx){
+  let svg = '';
+  MED_EVENTS.forEach(ev=>{
+    const localIdx = ev.dayIndex - startIdx;
+    if(localIdx>=0 && localIdx<dates.length){
+      const n = dates.length;
+      const x = n===1?0:localIdx*(w/(n-1));
+      svg += `<line x1="${x}" y1="4" x2="${x}" y2="${h-marginBottom}" stroke="#4A4A4A" stroke-width="1.5" stroke-dasharray="3,2"/>
+        <text x="${x}" y="12" font-size="8" fill="#4A4A4A" text-anchor="middle">${L('💊 Dosis ↑','💊 Dose ↑')}</text>`;
+    }
+  });
+  return svg;
+}
+function lineChart(values, dates, style, startIdx, showEvents){
+  const w=300,h=150, marginBottom=18, marginTop=16;
+  const max=Math.max(...values), min=Math.min(...values);
+  const span = (max-min)||1;
+  const pts = values.map((v,i)=>{
+    const x = values.length===1?0:i*(w/(values.length-1));
+    const y = marginTop + (h-marginTop-marginBottom) - ((v-min)/span)*(h-marginTop-marginBottom);
+    return [x,y];
+  });
+  const dash = style.dash? `stroke-dasharray="${style.dash}"` : '';
+  const line = pts.map(p=>p.join(',')).join(' ');
+  const area = `0,${h-marginBottom} ${line} ${w},${h-marginBottom}`;
+  let svg = `<svg viewBox="0 0 ${w} ${h}" role="img" aria-label="${L('Verlaufsgrafik','Trend chart')}">`;
+  svg += `<polygon points="${area}" fill="${style.color}" opacity="0.10"/>`;
+  svg += `<polyline points="${line}" fill="none" stroke="${style.color}" stroke-width="2.5" ${dash}/>`;
+  pts.forEach(([x,y])=>{ svg += markerSvg(style.marker, x, y, style.color); });
+  svg += buildAxis(dates, w, h, marginBottom);
+  if(showEvents) svg += medEventMarker(dates, w, h, marginBottom, startIdx);
+  svg += `</svg>`;
+  return svg;
+}
+function multiChart(seriesMap, dates, startIdx){
+  const w=300,h=150, marginBottom=18, marginTop=16;
+  let svg = `<svg viewBox="0 0 ${w} ${h}" role="img" aria-label="${L('Kombinierte Verlaufsgrafik','Combined trend chart')}">`;
+  Object.keys(seriesMap).forEach(key=>{
+    const {values, style} = seriesMap[key];
+    const max=Math.max(...values), min=Math.min(...values), span=(max-min)||1;
+    const pts = values.map((v,i)=>{
+      const x = values.length===1?0:i*(w/(values.length-1));
+      const y = marginTop + (h-marginTop-marginBottom) - ((v-min)/span)*(h-marginTop-marginBottom);
+      return [x,y];
+    });
+    const dash = style.dash? `stroke-dasharray="${style.dash}"` : '';
+    svg += `<polyline points="${pts.map(p=>p.join(',')).join(' ')}" fill="none" stroke="${style.color}" stroke-width="2.3" ${dash} opacity="0.95"/>`;
+    if(dates.length<=14) pts.forEach(([x,y])=>{ svg += markerSvg(style.marker, x, y, style.color); });
+  });
+  svg += buildAxis(dates, w, h, marginBottom);
+  if(seriesMap.medikation) svg += medEventMarker(dates, w, h, marginBottom, startIdx);
+  svg += `</svg>`;
+  return svg;
+}
+function buildTable(seriesMap, dates){
+  const keys = Object.keys(seriesMap);
+  let html = `<table class="datatable"><thead><tr><th>${L('Datum','Date')}</th>${keys.map(k=>`<th>${DICT[state.lang]['mod_'+k]}</th>`).join('')}</tr></thead><tbody>`;
+  for(let i=dates.length-1;i>=0;i--){
+    html += `<tr><td>${fmtDate(dates[i])}</td>${keys.map(k=>`<td>${seriesMap[k].values[i]}</td>`).join('')}</tr>`;
+  }
+  html += `</tbody></table>`;
+  return html;
+}
+function insightActiveModules(){ return MODULE_DEFS.filter(m=>state.modules[m.key] && SERIES90[m.key]); }
+function ensureComboSelection(){
+  const activeKeys = insightActiveModules().map(m=>m.key);
+  state.insightCombo = state.insightCombo.filter(k=>activeKeys.includes(k));
+  if(state.insightCombo.length===0) state.insightCombo = activeKeys.slice();
+}
+function renderComboPicker(){
+  const el = document.getElementById('insightComboPicker');
+  const active = insightActiveModules();
+  el.innerHTML = active.map(m=>
+    `<div class="tabpill ${state.insightCombo.includes(m.key)?'active':''}" onclick="toggleComboFactor('${m.key}')">${m.icon} ${DICT[state.lang]['mod_'+m.key]}</div>`).join('');
+}
+function toggleComboFactor(key){
+  const i = state.insightCombo.indexOf(key);
+  if(i>-1){ if(state.insightCombo.length>1) state.insightCombo.splice(i,1); }
+  else state.insightCombo.push(key);
+  renderComboPicker();
+  renderInsightChart();
+}
+function setInsightView(v){
+  state.insightView=v;
+  document.getElementById('viewSingleBtn').classList.toggle('active', v==='single');
+  document.getElementById('viewComboBtn').classList.toggle('active', v==='kombiniert');
+  document.getElementById('insightTabs').style.display = v==='single' ? 'flex':'none';
+  document.getElementById('insightComboPicker').style.display = v==='kombiniert' ? 'flex':'none';
+  if(v==='kombiniert'){ ensureComboSelection(); renderComboPicker(); }
+  renderInsightChart();
+}
+function setInsightRange(r){
+  state.insightRange=r;
+  ['range7Btn','range30Btn','range90Btn'].forEach(id=>document.getElementById(id).classList.remove('active'));
+  document.getElementById(r===7?'range7Btn':r===30?'range30Btn':'range90Btn').classList.add('active');
+  renderInsightChart();
+}
+function toggleInsightMode(){
+  state.insightMode = state.insightMode==='chart' ? 'table' : 'chart';
+  document.getElementById('modeToggleBtn').textContent = state.insightMode==='chart' ? DICT[state.lang].show_table : DICT[state.lang].show_chart;
+  renderInsightChart();
+}
+function renderInsights(){
+  const active = insightActiveModules();
+  if(!active.find(m=>m.key===state.insightTab)) state.insightTab = active[0]? active[0].key : null;
+  document.getElementById('insightTabs').innerHTML = active.map(m=>
+    `<div class="tabpill ${state.insightTab===m.key?'active':''}" onclick="selectInsightTab('${m.key}')">${m.icon} ${DICT[state.lang]['mod_'+m.key]}</div>`).join('');
+  document.getElementById('insightTabs').style.display = state.insightView==='single' ? 'flex':'none';
+  document.getElementById('insightComboPicker').style.display = state.insightView==='kombiniert' ? 'flex':'none';
+  if(state.insightView==='kombiniert'){ ensureComboSelection(); renderComboPicker(); }
+  renderInsightChart();
+  updateExportUI();
+  if(state.historyExpanded) renderHistory();
+}
+function selectInsightTab(key){ state.insightTab = key; renderInsightChart(); }
+function renderInsightChart(){
+  const active = insightActiveModules();
+  const box = document.getElementById('insightChartBox');
+  const tableBox = document.getElementById('insightTableBox');
+  const label = document.getElementById('insightChartLabel');
+  const legend = document.getElementById('insightLegend');
+  const cycleBanner = document.getElementById('cycleInsightBanner');
+  box.style.display = state.insightMode==='chart' ? 'block':'none';
+  tableBox.style.display = state.insightMode==='table' ? 'block':'none';
+  if(active.length===0){
+    box.innerHTML = `<p style="font-size:0.875rem;color:var(--ink-soft);">${L('Noch keine aktiven Module.','No active modules yet.')}</p>`;
+    tableBox.innerHTML=''; legend.innerHTML=''; label.textContent=''; cycleBanner.style.display='none'; return;
+  }
+  const range = state.insightRange;
+  const startIdx = HIST_DAYS-range;
+  const dates = DATES90.slice(-range);
+  let includesCycle = false;
+  if(state.insightView==='single'){
+    const m = active.find(x=>x.key===state.insightTab) || active[0];
+    includesCycle = (m.key==='zyklus');
+    label.textContent = `${DICT[state.lang]['mod_'+m.key].toUpperCase()} · ${range} ${L('TAGE','DAYS')}`;
+    const values = liveSeries(m.key).slice(-range);
+    box.innerHTML = lineChart(values, dates, CHART_STYLE[m.key], startIdx, m.key==='medikation');
+    tableBox.innerHTML = buildTable({[m.key]:{values, style:CHART_STYLE[m.key]}}, dates);
+    legend.innerHTML = `<span><i style="background:${CHART_STYLE[m.key].color}"></i>${DICT[state.lang]['mod_'+m.key]}</span>`;
+  } else {
+    ensureComboSelection();
+    const chosen = active.filter(m=>state.insightCombo.includes(m.key));
+    includesCycle = chosen.some(m=>m.key==='zyklus');
+    label.textContent = `${L('KOMBINIERT','COMBINED')} · ${range} ${L('TAGE','DAYS')}`;
+    const seriesMap = {};
+    chosen.forEach(m=>{ seriesMap[m.key] = {values: liveSeries(m.key).slice(-range), style: CHART_STYLE[m.key]}; });
+    box.innerHTML = multiChart(seriesMap, dates, startIdx);
+    tableBox.innerHTML = buildTable(seriesMap, dates);
+    legend.innerHTML = chosen.map(m=>`<span><i style="background:${CHART_STYLE[m.key].color}"></i>${DICT[state.lang]['mod_'+m.key]}</span>`).join('');
+  }
+  cycleBanner.style.display = includesCycle ? 'flex' : 'none';
+}
+function updateExportUI(){
+  const btnPdf = document.getElementById('btnPdf'), btnCsv = document.getElementById('btnCsv');
+  if(btnPdf) btnPdf.innerHTML = DICT[state.lang].export_pdf + (state.isPremium?` <span class="badge-ok">✓</span>`:` <span class="badge-pro">PRO</span>`);
+  if(btnCsv) btnCsv.innerHTML = DICT[state.lang].export_csv + (state.isPremium?` <span class="badge-ok">✓</span>`:` <span class="badge-pro">PRO</span>`);
+}
+function tryExport(type){
+  if(!state.isPremium){ openPaywall(); return; }
+  alert(L(`${type.toUpperCase()}-Export gestartet (Demo).`, `${type.toUpperCase()} export started (demo).`));
+}
+function openRetroLog(){
+  const days = [1,2,3,4,5].map(n=>{
+    const d = new Date(2026,6,24-n);
+    return `<div class="rowline"><span>${d.toLocaleDateString(state.lang==='de'?'de-DE':'en-US',{weekday:'short',day:'numeric',month:'short'})}</span>
+    <button class="btn btn-ghost btn-sm" onclick="alert(L('Eintrag ergänzt (Demo).','Entry added (demo).')); closeModal();">${L('Nachtragen','Add')}</button></div>`;
+  }).join('');
+  openModal(`<h3>${L('Verpasste Tage','Missing days')}</h3>${days}`);
+}
+function openPaywall(customMsg){
+  openModal(`<h3>NODALYS Premium</h3>
+    ${customMsg?`<p style="font-size:0.875rem;color:var(--ink-soft);">${customMsg}</p>`:''}
+    <ul style="font-size:0.875rem;padding-left:18px;line-height:1.8;">
+      <li>${L('Beliebig viele Module gleichzeitig','Unlimited modules at once')}</li>
+      <li>${L('Health-App-Import','Health app import')}</li>
+      <li>${L('PDF-Berichte','PDF reports')}</li>
+      <li>${L('CSV-Export','CSV export')}</li>
+    </ul>
+    <p style="font-size:0.8125rem;color:var(--ink-soft);">${L('30 Tage kostenlos testen.','Free 30-day trial.')}</p>
+    <button class="btn btn-primary" onclick="togglePremiumDemo(true); closeModal();">${L('Trial starten (Demo)','Start trial (demo)')}</button>`);
+}
+function togglePremiumDemo(v){
+  state.isPremium=v;
+  state.trialDaysLeft = v ? 30 : null;
+  if(document.getElementById('s-tailor').classList.contains('active')) renderTailor();
+  if(document.getElementById('s-insights').classList.contains('active')) renderInsights();
+}
+
+/* ---------- SETTINGS ---------- */
+function renderSettingsHome(){
+  document.getElementById('profileNameLabel').textContent = state.name || 'Zoe';
+  document.getElementById('premiumLinkTop').style.display = state.isPremium ? 'none' : 'block';
+}
+function openSettingsSection(section){
+  let html = '';
+  if(section==='profile'){
+    html = `<h3>${DICT[state.lang].row_profile}</h3>
+      <div class="rowline"><span>${L('Name','Name')}</span><span>${state.name||'–'}</span></div>
+      <div class="rowline"><span>${L('Geschlecht','Gender')}</span><span>${genderLabel()}</span></div>
+      <div class="rowline"><span>${L('Alter','Age')}</span><span>${state.age||'–'}</span></div>
+      <div class="rowline"><span>${L('Größe','Height')}</span><span>${state.height?state.height+' cm':'–'}</span></div>
+      <div class="rowline"><span>${L('Gewicht','Weight')}</span><span>${state.weight?state.weight+' kg':'–'}</span></div>
+      <div class="rowline"><span>${L('Status','Status')}</span><span>${state.isPremium?L('Premium','Premium'):L('Kostenlos','Free')}</span></div>
+      ${state.kidsMode ? `
+      <div class="label" style="margin-top:14px;">${L('KIDS-MODUS','KIDS MODE')}</div>
+      <div class="rowline"><span>${L('Altersstufe','Age tier')}</span><span>${state.ageTier==='young'?L('unter 12','under 12'):'12–15'}</span></div>
+      <div class="rowline"><span>${L('Einwilligung durch','Consent given by')}</span><span>${state.guardianName||'–'}</span></div>
+      <div class="rowline"><span>${L('Status','Status')}</span><span>${state.guardianConsent?'✅ '+L('erteilt','granted'):'–'}</span></div>
+      <button class="btn btn-ghost btn-sm" style="margin-top:6px;color:var(--rose);border-color:var(--rose-soft);" onclick="if(confirm(L('Einwilligung wirklich widerrufen? Der Kids-Modus-Status bleibt erhalten, bis eine neue Einwilligung erteilt wird.','Really revoke consent? Kids-mode status remains until a new consent is given.'))){ state.guardianConsent=false; openSettingsSection('profile'); }">${L('Einwilligung widerrufen','Revoke consent')}</button>
+      <p style="font-size:0.72rem;color:var(--ink-soft);margin-top:6px;">${L('Hinweis (Prototyp): Diese Einwilligung ist selbst erklärt und nicht identitätsgeprüft – für einen echten Launch ist ein verifizierter Prozess nötig (z.B. Bestätigungs-E-Mail an Erziehungsberechtigte).','Note (prototype): this consent is self-declared and not identity-verified – a real launch needs a verified process (e.g. confirmation email to the guardian).')}</p>` : ''}
+      <button class="btn btn-primary" style="margin-top:10px;" onclick="closeModal(); openSettingsSection('premium')">${L('Premium verwalten','Manage Premium')}</button>`;
+  } else if(section==='meds'){
+    html = `<h3>${DICT[state.lang].row_meds}</h3><div id="medsModalList"></div>
+      <button class="btn btn-ghost btn-sm" onclick="addMed()">+ ${L('Medikament hinzufügen','Add medication')}</button>`;
+  } else if(section==='modules'){
+    html = `<h3>${DICT[state.lang].row_modules}</h3><div id="modulesModalList"></div>`;
+  } else if(section==='privacy'){
+    html = `<h3>${DICT[state.lang].row_privacy}</h3>
+      <div class="tip-banner">⚠️ ${L('Deine Daten liegen ausschließlich auf diesem Gerät. Ohne Backup (Export oder eigene Cloud) sind sie bei Geräteverlust, -wechsel oder App-Löschung unwiederbringlich weg.','Your data lives only on this device. Without a backup (export or your own cloud), it is permanently lost if you lose, replace, or wipe this device.')}</div>
+      <div class="rowline"><span>${L('FaceID / Fingerabdruck','FaceID / fingerprint')}</span><label class="switch"><input type="checkbox" checked><span class="slider-track"></span></label></div>
+      <div class="rowline"><span>${L('Verschlüsseltes Backup','Encrypted backup')}</span><label class="switch"><input type="checkbox"><span class="slider-track"></span></label></div>
+      <div class="btn-row" style="margin-top:10px;">
+        <button class="btn btn-ghost" onclick="tryExport('pdf')">${L('Export','Export')}</button>
+        <button class="btn btn-ghost" style="color:var(--rose);border-color:var(--rose-soft);" onclick="if(confirm(L('Wirklich alle Daten löschen?','Really delete all data?'))) alert(L('Gelöscht (Demo).','Deleted (demo).'))">${L('Löschen','Delete')}</button>
+      </div>`;
+  } else if(section==='appearance'){
+    html = `<h3>${DICT[state.lang].row_appearance}</h3>
+      <div class="rowline"><span>${L('Dark Mode','Dark mode')}</span><label class="switch"><input type="checkbox" ${state.dark?'checked':''} onchange="toggleDark(this.checked)"><span class="slider-track"></span></label></div>
+      <div class="rowline"><span>${L('Sprache','Language')}</span><span>${state.lang==='de'?'Deutsch':'English'} (${L('oben rechts wechseln','switch top right')})</span></div>`;
+  } else if(section==='notifications'){
+    html = `<h3>${DICT[state.lang].row_notifications}</h3>
+      <div class="rowline"><span>${DICT[state.lang].notif_meds_label}</span><label class="switch"><input type="checkbox" ${state.notif.medsReminder?'checked':''} onchange="state.notif.medsReminder=this.checked"><span class="slider-track"></span></label></div>
+      <div class="rowline"><span>${DICT[state.lang].notif_recap_label}</span><label class="switch"><input type="checkbox" ${state.notif.eveningRecap?'checked':''} onchange="state.notif.eveningRecap=this.checked"><span class="slider-track"></span></label></div>
+      <p style="font-size:0.78rem;color:var(--ink-soft);margin-top:8px;">${DICT[state.lang].notif_recap_desc}</p>`;
+  } else if(section==='contact'){
+    const faqs = [
+      [L('Ist NODALYS ein Medizinprodukt?','Is NODALYS a medical device?'), L('Nein. NODALYS sammelt und visualisiert deine Daten, stellt aber keine Diagnosen und gibt keine medizinischen Empfehlungen.','No. NODALYS collects and visualizes your data, but does not diagnose or give medical advice.')],
+      [L('Werden meine Daten irgendwohin hochgeladen?','Is my data uploaded anywhere?'), L('Nein, alles bleibt lokal auf deinem Gerät. Nur verschlüsselte Backups landen optional in deiner eigenen iCloud/Google Drive.','No, everything stays local on your device. Only encrypted backups optionally go to your own iCloud/Google Drive.')],
+      [L('Kann ich meine Daten auf ein neues Handy mitnehmen?','Can I take my data to a new phone?'), L('Ja, über den verschlüsselten Backup-Export unter Daten & Datenschutz.','Yes, via the encrypted backup export under Data & Privacy.')],
+      [L('Sagt mir die App, ob ich ADHS habe?','Does the app tell me if I have ADHD?'), L('Nein. NODALYS macht nur Muster sichtbar – die Einordnung bleibt bei dir und ggf. einer Fachperson.','No. NODALYS only makes patterns visible – interpretation stays with you and, if relevant, a professional.')],
+      [L('Schützt mich der Zyklus-Tracker vor einer Schwangerschaft?','Does the cycle tracker protect me from pregnancy?'), L('Nein. NODALYS ist keine Verhütungsmethode und ersetzt keine.','No. NODALYS is not a contraceptive method and does not replace one.')],
+    ];
+    html = `<h3>${DICT[state.lang].row_contact}</h3>
+      <p style="font-size:0.875rem;">${L('Kontakt zum NODALYS-Team','Contact the NODALYS team')}: <a class="linkline" style="display:inline;margin:0;">team@nodalys.app</a></p>
+      <div class="label" style="margin-top:14px;">Q&A</div>
+      ${faqs.map((f,i)=>`<div><div class="faq-q" onclick="this.nextElementSibling.classList.toggle('open')">❓ ${f[0]}</div><div class="faq-a">${f[1]}</div></div>`).join('')}`;
+  } else if(section==='emergency'){
+    html = `<h3>${DICT[state.lang].row_emergency}</h3>
+      <p style="font-size:0.8125rem;color:var(--ink-soft);">${L('NODALYS selbst bietet keine eigene Hotline an. Bei akuter psychischer Belastung oder Krise helfen dir folgende kostenlosen, unabhängigen Stellen (Deutschland):','NODALYS itself does not run its own hotline. In an acute mental health crisis, these free, independent services can help (Germany):')}</p>
+      <div class="rowline"><span>${L('Akute Gefahr','Acute danger')}</span><b>112</b></div>
+      <div class="rowline"><span>TelefonSeelsorge® (${L('kostenlos, 24/7, anonym','free, 24/7, anonymous')})</span><b>0800 111 0 111</b></div>
+      <div class="rowline"><span>TelefonSeelsorge®</span><b>116 123</b></div>
+      <div class="rowline"><span>${L('Nummer gegen Kummer (Kinder/Jugendliche)','Nummer gegen Kummer (children/teens)')}</span><b>116 111</b></div>
+      <p style="font-size:0.72rem;color:var(--ink-soft);margin-top:10px;">${L('Außerhalb Deutschlands: bitte die lokale Notrufnummer oder Krisenhotline deines Landes nutzen.','Outside Germany: please use your country’s local emergency number or crisis line.')}</p>`;
+  } else if(section==='premium'){
+    html = `<h3>NODALYS Premium <span class="badge-pro">${state.isPremium?L('AKTIV','ACTIVE'):'PRO'}</span></h3>
+      <ul style="font-size:0.875rem;padding-left:18px;line-height:1.8;">
+        <li>${L('Beliebig viele Module gleichzeitig','Unlimited modules at once')}</li>
+        <li>${L('Health-App-Import','Health app import')}</li>
+        <li>${L('PDF-Berichte & CSV-Export','PDF reports & CSV export')}</li>
+      </ul>
+      ${state.isPremium && state.trialDaysLeft ? `<p style="font-size:0.8125rem;color:var(--green);font-weight:600;">${L(`Trial: ${state.trialDaysLeft} Tage verbleibend (Demo)`, `Trial: ${state.trialDaysLeft} days remaining (demo)`)}</p>` : ''}
+      <div class="rowline"><span>${L('Premium aktiv (Demo)','Premium active (demo)')}</span>
+        <label class="switch"><input type="checkbox" ${state.isPremium?'checked':''} onchange="togglePremiumDemo(this.checked); openSettingsSection('premium');"><span class="slider-track"></span></label></div>
+      <p style="font-size:0.72rem;color:var(--ink-soft);margin-top:10px;">${L('Kauf & Verlängerung laufen über App Store/Play Store – kein eigenes Zahlungssystem, Wiederherstellung über „Käufe wiederherstellen“.','Purchase & renewal run through the App/Play Store – no custom payment system, restore via “Restore purchases”.')}</p>`;
+  }
+  openModal(html);
+  if(section==='meds') renderMedsList();
+  if(section==='modules') renderModulesModalList();
+}
+function genderLabel(){
+  return {w:L('Weiblich','Female'), m:L('Männlich','Male'), d:L('Divers','Non-binary'), n:L('Keine Angabe','Prefer not to say')}[state.gender] || '–';
+}
+function renderModulesModalList(){
+  const el = document.getElementById('modulesModalList'); if(!el) return;
+  const count = activeCount();
+  el.innerHTML = `<p style="font-size:0.78rem;color:var(--ink-soft);">${count}/${state.isPremium?L('unbegrenzt','unlimited'):MAX_FREE_MODULES} ${L('aktiv','active')}</p>` +
+    MODULE_DEFS.map(m=>{
+      const on = state.modules[m.key]; const locked = !on && !canEnable(m.key);
+      return `<div class="rowline ${locked?'locked-row':''}"><span>${m.icon} ${DICT[state.lang]['mod_'+m.key]} ${locked?'<span class=\"badge-pro\">PRO</span>':''}</span>
+      <label class="switch"><input type="checkbox" ${on?'checked':''} onchange="toggleModuleSettings('${m.key}',this)" aria-label="${DICT[state.lang]['mod_'+m.key]}"><span class="slider-track"></span></label></div>`;
+    }).join('');
+}
+function toggleModuleSettings(key, input){
+  if(input.checked && !canEnable(key)){
+    input.checked=false; closeModal();
+    openPaywall(L('Du hast bereits 3 Module aktiv. Mit Premium kannst du beliebig viele gleichzeitig tracken.','You already have 3 active modules. With Premium you can track as many as you like at once.'));
+    return;
+  }
+  state.modules[key]=input.checked;
+  renderModulesModalList();
+}
+function renderMedsList(){
+  const el = document.getElementById('medsModalList'); if(!el) return;
+  el.innerHTML = state.meds.map((m,i)=>
+    `<div class="rowline"><span>${m.name}${m.dose?' · '+m.dose:''} · ${freqLabel(m.timesPerDay||1)}</span>
+     <button class="btn btn-ghost btn-sm" onclick="removeMed(${i})" aria-label="${L('Entfernen','Remove')}">✕</button></div>`).join('') || `<p style="font-size:0.875rem;color:var(--ink-soft);">${L('Keine Medikamente hinterlegt.','No medication added yet.')}</p>`;
+}
+function addMed(){
+  const name = prompt(L('Medikamentenname (Marke oder Wirkstoff):','Medication name (brand or active ingredient):'));
+  if(!name) return;
+  const dose = prompt(L('Dosis (optional):','Dose (optional):')) || '';
+  let freq = parseInt(prompt(L('Wie oft am Tag? (Zahl, z.B. 1, 2, 3)','How often per day? (number, e.g. 1, 2, 3)'), '1'), 10);
+  if(!freq || freq<1) freq = 1;
+  state.meds.push({id:'m'+Date.now(), name, dose, timesPerDay:freq, taken:false, takenCount:0});
+  state.modules.medikation = true;
+  renderMedsList();
+}
+function removeMed(i){ state.meds.splice(i,1); renderMedsList(); }
+
+/* ---------- modal ---------- */
+function openModal(html){ document.getElementById('modalContent').innerHTML = `<button class="close-x" onclick="closeModal()" aria-label="${L('Schließen','Close')}">✕</button>${html}`; document.getElementById('modalBg').classList.remove('hidden'); }
+function closeModal(){ document.getElementById('modalBg').classList.add('hidden'); }
+
+/* ---------- init ---------- */
+buildGender(); buildFocus(); buildReason(); buildMeds(); buildCycle(); buildHormonal(); buildHormoneModuleChoice();
+applyI18n();
+</script>
+</body>
+</html>
