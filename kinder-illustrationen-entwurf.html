@@ -1,0 +1,126 @@
+<!DOCTYPE html>
+<html lang="de">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>NODALYS – Illustrationsentwurf Kinderversion (Diskussionsgrundlage)</title>
+<style>
+  :root{
+    --sand:#EAE1CE; --sand-card:#F4EDDD; --sand-border:#DED2B7;
+    --ink:#332E27; --ink-soft:#7A7263; --ink-faint:#A69E8C;
+    --blue:#4A9BB0; --blue-soft:#DCEFF0;
+    --rose:#C0808A; --rose-soft:#F1DEE0;
+    --green:#6E8F6E; --green-soft:#DEE7DA;
+    --purple:#8B7FBF; --purple-soft:#E4DFF3;
+    --gold:#D8A657; --gold-soft:#F1E3C7;
+    --serif: Georgia, 'Times New Roman', serif;
+    --sans: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
+  }
+  *{box-sizing:border-box;}
+  body{margin:0;background:#DCD3C0;font-family:var(--sans);color:var(--ink);padding:40px 20px;}
+  .wrap{max-width:920px;margin:0 auto;}
+  h1{font-family:var(--serif);font-weight:400;font-size:2rem;margin-bottom:4px;}
+  .sub{color:var(--ink-soft);font-size:0.95rem;line-height:1.6;margin-bottom:6px;}
+  .flag{background:var(--rose-soft);border:1px solid var(--rose);border-radius:16px;padding:14px 18px;font-size:0.85rem;color:var(--ink);line-height:1.6;margin:18px 0 34px;}
+  h2{font-family:var(--serif);font-weight:400;font-size:1.3rem;margin:36px 0 14px;border-bottom:1px solid var(--sand-border);padding-bottom:8px;}
+  .grid{display:grid;grid-template-columns:repeat(auto-fill,minmax(150px,1fr));gap:16px;}
+  .tile{background:var(--sand-card);border:1px solid var(--sand-border);border-radius:24px;padding:20px 12px;text-align:center;}
+  .tile svg{width:64px;height:64px;}
+  .tile .lbl{margin-top:10px;font-size:0.8rem;font-weight:700;color:var(--ink-soft);}
+  .avatarrow{display:flex;gap:14px;flex-wrap:wrap;margin-top:6px;}
+  .avatarrow .a{width:64px;height:64px;border-radius:50%;}
+  .avatarrow .b{width:64px;height:64px;border-radius:22px;}
+  .avatarrow .c{width:64px;height:64px;clip-path:polygon(50% 6%, 94% 94%, 6% 94%);border-radius:14px;}
+  .note{font-size:0.78rem;color:var(--ink-faint);margin-top:6px;}
+</style>
+</head>
+<body>
+<div class="wrap">
+  <h1>Illustrationsentwurf — Kinderversion</h1>
+  <p class="sub">Erster eigener Entwurf (kein Ersatz für Leo Lamprechts Designarbeit) — organisch-geometrisch, Plan-Toys-Richtung, gedeckte Farben, gender-neutral, keine Gesichter/Emoji. Ziel: Diskussionsgrundlage, nicht finales Design.</p>
+  <div class="flag">
+    <b>Kritischer Hinweis:</b> Das hier sind von mir erstellte SVG-Formen, keine von einer Designerin/einem Designer gestalteten Illustrationen. Sie sollen zeigen, in welche Richtung "organisch-geometrisch, Plan-Toys-Stil" gedacht werden könnte — nicht, wie das finale NODALYS-Kinderdesign aussehen soll. Bitte als Ausgangspunkt für ein Gespräch mit Leo verstehen, nicht als Entscheidung.
+  </div>
+
+  <h2>Modul-Icons</h2>
+  <div class="grid">
+
+    <div class="tile">
+      <svg viewBox="0 0 64 64"><circle cx="32" cy="30" r="18" fill="var(--blue-soft)" stroke="var(--blue)" stroke-width="3"/><circle cx="32" cy="30" r="7" fill="var(--blue)"/><rect x="43" y="43" width="14" height="6" rx="3" fill="var(--blue)" transform="rotate(45 43 43)"/></svg>
+      <div class="lbl">Konzentration</div>
+    </div>
+
+    <div class="tile">
+      <svg viewBox="0 0 64 64"><path d="M32 10c12 0 20 9 20 22 0 11-9 20-20 20s-20-9-20-20c0-13 8-22 20-22z" fill="var(--rose-soft)" stroke="var(--rose)" stroke-width="3"/><path d="M22 34c3 5 7 7 10 7s7-2 10-7" fill="none" stroke="var(--rose)" stroke-width="3" stroke-linecap="round"/></svg>
+      <div class="lbl">Stimmung</div>
+    </div>
+
+    <div class="tile">
+      <svg viewBox="0 0 64 64"><path d="M36 6 20 34h10l-4 24 18-30H34z" fill="var(--gold-soft)" stroke="var(--gold)" stroke-width="3" stroke-linejoin="round"/></svg>
+      <div class="lbl">Energie</div>
+    </div>
+
+    <div class="tile">
+      <svg viewBox="0 0 64 64"><path d="M42 12a20 20 0 1 0 10 32A16 16 0 0 1 42 12z" fill="var(--purple-soft)" stroke="var(--purple)" stroke-width="3" stroke-linejoin="round"/><circle cx="46" cy="42" r="2.4" fill="var(--purple)"/><circle cx="38" cy="20" r="1.8" fill="var(--purple)"/></svg>
+      <div class="lbl">Schlaf</div>
+    </div>
+
+    <div class="tile">
+      <svg viewBox="0 0 64 64"><path d="M8 34c5-9 9 9 14 0s9-9 14 0 9-9 14 0 9-9 14 0" fill="none" stroke="var(--green)" stroke-width="4" stroke-linecap="round"/><circle cx="32" cy="34" r="26" fill="none" stroke="var(--green-soft)" stroke-width="3"/></svg>
+      <div class="lbl">Aufgeregtheit</div>
+    </div>
+
+    <div class="tile">
+      <svg viewBox="0 0 64 64"><rect x="14" y="26" width="36" height="16" rx="8" fill="var(--blue-soft)" stroke="var(--blue)" stroke-width="3"/><line x1="32" y1="26" x2="32" y2="42" stroke="var(--blue)" stroke-width="3"/></svg>
+      <div class="lbl">Medikamente</div>
+    </div>
+
+    <div class="tile">
+      <svg viewBox="0 0 64 64"><path d="M14 30a18 18 0 0 1 36 0z" fill="var(--gold-soft)" stroke="var(--gold)" stroke-width="3"/><ellipse cx="32" cy="34" rx="20" ry="7" fill="var(--gold-soft)" stroke="var(--gold)" stroke-width="3"/></svg>
+      <div class="lbl">Essen</div>
+    </div>
+
+    <div class="tile">
+      <svg viewBox="0 0 64 64"><path d="M32 10c10 12 16 20 16 28a16 16 0 1 1-32 0c0-8 6-16 16-28z" fill="var(--rose-soft)" stroke="var(--rose)" stroke-width="3" stroke-linejoin="round"/></svg>
+      <div class="lbl">Periode</div>
+    </div>
+
+  </div>
+
+  <h2>Navigation</h2>
+  <div class="grid">
+    <div class="tile">
+      <svg viewBox="0 0 64 64"><path d="M12 30 32 14l20 16v22a4 4 0 0 1-4 4H16a4 4 0 0 1-4-4z" fill="var(--sand)" stroke="var(--ink-soft)" stroke-width="3" stroke-linejoin="round"/></svg>
+      <div class="lbl">Heute</div>
+    </div>
+    <div class="tile">
+      <svg viewBox="0 0 64 64"><rect x="12" y="34" width="10" height="18" rx="4" fill="var(--blue-soft)" stroke="var(--blue)" stroke-width="3"/><rect x="27" y="22" width="10" height="30" rx="4" fill="var(--rose-soft)" stroke="var(--rose)" stroke-width="3"/><rect x="42" y="12" width="10" height="40" rx="4" fill="var(--green-soft)" stroke="var(--green)" stroke-width="3"/></svg>
+      <div class="lbl">Meine Muster</div>
+    </div>
+    <div class="tile">
+      <svg viewBox="0 0 64 64"><circle cx="32" cy="32" r="10" fill="var(--sand)" stroke="var(--ink-soft)" stroke-width="3"/><circle cx="32" cy="32" r="22" fill="none" stroke="var(--ink-faint)" stroke-width="3" stroke-dasharray="6 6"/></svg>
+      <div class="lbl">Einstellungen</div>
+    </div>
+  </div>
+
+  <h2>Avatar-Grundformen (Silhouetten, keine Fotos)</h2>
+  <p class="sub" style="margin-bottom:10px;">Passend zur bestehenden Entscheidung "Farbe + Form statt Foto" — drei neutrale Grundformen, sechs Farben aus der bestehenden Kinderpalette.</p>
+  <div class="avatarrow">
+    <div class="a" style="background:var(--blue);"></div>
+    <div class="b" style="background:var(--rose);"></div>
+    <div class="c" style="background:var(--green);"></div>
+    <div class="a" style="background:var(--purple);"></div>
+    <div class="b" style="background:var(--gold);"></div>
+    <div class="c" style="background:#5FA8A0;"></div>
+  </div>
+  <p class="note">Kreis, abgerundetes Quadrat, abgerundetes Dreieck — austauschbar mit Farbe, kein Gesicht, keine Marken-/Charakteranspielung.</p>
+
+  <h2>Offene Fragen an dich</h2>
+  <p class="sub">
+    1) Passt die Formensprache (dick umrandet, organisch, keine Gesichter) in die Richtung, die du dir vorstellst, oder eher verspielter/eher reduzierter?<br>
+    2) Soll das "Periode"-Icon so abstrakt bleiben (Tropfen), oder lieber komplett neutral (z.B. ein Kalenderblatt-Symbol) wirken?<br>
+    3) Reicht dir dieser Icon-Level, oder schwebt dir eher eine Szene/Charakter-Illustration vor (z.B. eine kleine Figur, die durchs Onboarding führt)?
+  </p>
+</div>
+</body>
+</html>

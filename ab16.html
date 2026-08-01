@@ -62,6 +62,7 @@
   .nav-btn.active{color:var(--blue);}
   .disclaimer{font-size:0.72rem;color:var(--ink-faint);line-height:1.5;font-style:italic;margin-top:14px;}
   .badge-pro{display:inline-block;background:var(--purple);color:#fff;font-size:0.6rem;font-weight:700;padding:2px 7px;border-radius:8px;margin-left:6px;}
+  .badge-ok{display:inline-block;background:var(--green);color:#fff;font-size:0.6rem;font-weight:700;padding:2px 7px;border-radius:8px;margin-left:6px;}
   .tile-row{display:grid;grid-template-columns:repeat(5,1fr);gap:8px;margin:10px 0 2px;}
   .tile{height:44px;border-radius:var(--radius);border:1px solid var(--sand-border);background:var(--sand);font-size:0.9375rem;font-weight:600;cursor:pointer;color:var(--ink);}
   .tile.selected{background:var(--blue);color:#fff;border-color:var(--blue);}
@@ -90,6 +91,22 @@
   .med-card{background:var(--blue);color:#fff;border-radius:18px;padding:16px 18px;margin-bottom:14px;display:flex;justify-content:space-between;align-items:center;}
   .med-card .checkbtn{width:34px;height:34px;border-radius:50%;background:rgba(255,255,255,.2);border:none;color:#fff;cursor:pointer;}
   .med-card .checkbtn.done{background:#fff;color:var(--blue);}
+  .segctl{display:flex;background:var(--sand-border);border-radius:14px;padding:3px;margin-bottom:12px;}
+  .segctl button{flex:1;border:none;background:transparent;padding:9px;border-radius:11px;font-size:0.8125rem;font-weight:600;color:var(--ink-soft);cursor:pointer;font-family:var(--sans);}
+  .segctl button.active{background:var(--sand-card);color:var(--ink);}
+  .daycircles{display:flex;justify-content:space-between;margin:10px 0;}
+  .daycircle{display:flex;flex-direction:column;align-items:center;gap:6px;font-size:0.6875rem;color:var(--ink-soft);}
+  .daycircle .dot{width:32px;height:32px;border-radius:50%;display:flex;align-items:center;justify-content:center;font-weight:700;font-size:0.75rem;color:var(--ink);background:var(--blue-soft);}
+  .calgrid{display:grid;grid-template-columns:repeat(7,1fr);gap:4px;text-align:center;}
+  .calgrid .dow{font-size:0.625rem;color:var(--ink-faint);margin-bottom:4px;}
+  .calgrid .day{aspect-ratio:1;display:flex;align-items:center;justify-content:center;border-radius:10px;font-size:0.78rem;background:var(--sand);position:relative;}
+  .calgrid .day.has:after{content:"";position:absolute;bottom:4px;width:4px;height:4px;border-radius:50%;background:var(--blue);}
+  .calgrid .day.today{background:var(--blue);color:#fff;font-weight:700;}
+  .legend{display:flex;flex-wrap:wrap;gap:10px;margin-top:10px;font-size:0.72rem;color:var(--ink-soft);}
+  .legend span{display:inline-flex;align-items:center;gap:5px;}
+  .legend i{width:16px;height:2px;display:inline-block;}
+  table.datatable{width:100%;border-collapse:collapse;font-size:0.78rem;}
+  table.datatable th, table.datatable td{padding:6px 4px;border-bottom:1px solid var(--sand-border);text-align:left;}
 </style>
 </head>
 <body>
@@ -117,6 +134,11 @@
 <symbol id="i-plus" viewBox="0 0 24 24"><line x1="12" y1="5" x2="12" y2="19" stroke="currentColor" stroke-width="2.4" stroke-linecap="round"/><line x1="5" y1="12" x2="19" y2="12" stroke="currentColor" stroke-width="2.4" stroke-linecap="round"/></symbol>
 <symbol id="i-x" viewBox="0 0 24 24"><line x1="6" y1="6" x2="18" y2="18" stroke="currentColor" stroke-width="2.4" stroke-linecap="round"/><line x1="18" y1="6" x2="6" y2="18" stroke="currentColor" stroke-width="2.4" stroke-linecap="round"/></symbol>
 <symbol id="i-calendar" viewBox="0 0 24 24"><rect x="3" y="5" width="18" height="16" rx="2" fill="none" stroke="currentColor" stroke-width="2"/><line x1="3" y1="10" x2="21" y2="10" stroke="currentColor" stroke-width="2"/><line x1="8" y1="3" x2="8" y2="7" stroke="currentColor" stroke-width="2" stroke-linecap="round"/><line x1="16" y1="3" x2="16" y2="7" stroke="currentColor" stroke-width="2" stroke-linecap="round"/></symbol>
+<symbol id="i-bell" viewBox="0 0 24 24"><path d="M6 10a6 6 0 0 1 12 0c0 5 2 6 2 6H4s2-1 2-6z" fill="none" stroke="currentColor" stroke-width="2" stroke-linejoin="round"/><path d="M10 20a2 2 0 0 0 4 0" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"/></symbol>
+<symbol id="i-table" viewBox="0 0 24 24"><rect x="3" y="4" width="18" height="16" rx="2" fill="none" stroke="currentColor" stroke-width="2"/><line x1="3" y1="10" x2="21" y2="10" stroke="currentColor" stroke-width="2"/><line x1="9" y1="4" x2="9" y2="20" stroke="currentColor" stroke-width="2"/></symbol>
+<symbol id="i-cloud" viewBox="0 0 24 24"><path d="M7 18a4.5 4.5 0 0 1-1-8.9 5.5 5.5 0 0 1 10.7-1.7A4 4 0 0 1 17 18H7z" fill="none" stroke="currentColor" stroke-width="2" stroke-linejoin="round"/></symbol>
+<symbol id="i-chevl" viewBox="0 0 24 24"><path d="M15 5l-7 7 7 7" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"/></symbol>
+<symbol id="i-chevr" viewBox="0 0 24 24"><path d="M9 5l7 7-7 7" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"/></symbol>
 </svg>
 <div class="phone" id="phone">
   <button id="backBtn" class="backbtn hidden" onclick="goBack()" aria-label="Zurück"><svg class="icon"><use href="#i-x"/></svg></button>
@@ -156,6 +178,17 @@
         <input type="number" id="inpWeight" placeholder="Gewicht (kg)" style="flex:1;">
       </div>
       <button class="btn btn-primary" onclick="saveProfile()">Weiter</button>
+    </section>
+
+    <section class="screen" id="s-agegate" style="text-align:center;">
+      <div class="eyebrow">BESTÄTIGUNG</div>
+      <h1 class="hero">Bitte bestätigen</h1>
+      <p class="sub" id="agegateText">Bitte bestätige, dass deine Altersangabe stimmt.</p>
+      <label class="choice" style="display:flex;gap:10px;align-items:flex-start;cursor:pointer;">
+        <input type="checkbox" id="chkAgeTruth" style="margin-top:3px;" onchange="document.getElementById('agegateBtn').disabled=!this.checked">
+        <span id="agegateCheckboxText">Ich bestätige, dass diese Angabe stimmt.</span>
+      </label>
+      <button class="btn btn-primary" id="agegateBtn" disabled onclick="afterAgegate()">Weiter</button>
     </section>
 
     <section class="screen" id="s-focus">
@@ -206,10 +239,11 @@
       <div class="eyebrow">SCHRITT 5</div>
       <h1 class="hero">Möchtest du deinen Zyklus beobachten?</h1>
       <p class="sub">Periode, PMS, Eisprung – neutral dokumentiert.</p>
-      <div class="tip-banner"><svg class="icon" style="flex-shrink:0;margin-top:2px;"><use href="#i-warn"/></svg> NODALYS dient nicht der Verhütung und ersetzt keine Verhütungsmethode.</div>
+      <div class="tip-banner"><svg class="icon" style="flex-shrink:0;margin-top:2px;"><use href="#i-warn"/></svg> NODALYS dient nicht der Verhütung und ersetzt keine Verhütungsmethode. Verlasse dich nicht auf diese App, um eine Schwangerschaft zu vermeiden.</div>
+      <button class="btn btn-ghost" id="cycleUnderstoodBtn" style="margin-top:10px;" onclick="confirmCycleUnderstood()"><svg class="icon"><use href="#i-check"/></svg> Verstanden</button>
       <div style="height:10px;"></div>
       <div id="cycleChoices"></div>
-      <button class="btn btn-primary" onclick="finishCycleStep()" style="margin-top:8px;">Weiter</button>
+      <button class="btn btn-primary" id="cycleNextBtn" disabled onclick="finishCycleStep()" style="margin-top:8px;">Weiter</button>
     </section>
 
     <section class="screen" id="s-hormonal">
@@ -233,8 +267,27 @@
       <svg style="width:52px;height:52px;color:var(--blue);"><use href="#i-chart"/></svg>
       <h1 class="hero">Health-Daten verbinden</h1>
       <p class="sub">Apple Health oder Google Health Connect für Schlaf/Aktivität.</p>
-      <button class="btn btn-primary" onclick="go('s-tailor'); initTailor(); renderTailor();">Verbinden</button>
-      <a class="linkline" onclick="go('s-tailor'); initTailor(); renderTailor();">Später</a>
+      <div class="tip-banner" style="text-align:left;cursor:pointer;" onclick="openHealthInfo()">
+        <svg class="icon" style="flex-shrink:0;margin-top:2px;"><use href="#i-info"/></svg>
+        <span>Pro Gerät darf nur ein Profil Health-Daten importieren. <u>Mehr erfahren</u></span>
+      </div>
+      <div style="height:6px;"></div>
+      <button class="btn btn-primary" onclick="state.healthSync=true; go('s-notifications');">Verbinden</button>
+      <a class="linkline" onclick="go('s-notifications');">Später</a>
+    </section>
+
+    <section class="screen" id="s-notifications">
+      <div class="eyebrow">SCHRITT 5</div>
+      <h1 class="hero">Möchtest du Erinnerungen erhalten?</h1>
+      <p class="sub">Ganz optional – jederzeit in den Einstellungen änderbar.</p>
+      <div class="card">
+        <div class="rowline"><span>Medikamenten-Erinnerung (genommen: ja/nein)</span>
+          <label class="switch"><input type="checkbox" id="notifMedsChk" onchange="state.notif.medsReminder=this.checked"><span class="slider-track"></span></label></div>
+        <div class="rowline"><span>Abend-Recap</span>
+          <label class="switch"><input type="checkbox" id="notifRecapChk" onchange="state.notif.eveningRecap=this.checked"><span class="slider-track"></span></label></div>
+        <p style="font-size:0.78rem;color:var(--ink-soft);margin:8px 0 0;">Kurze Zusammenfassung deines Tages am Abend, ca. 1 Minute Lesezeit.</p>
+      </div>
+      <button class="btn btn-primary" onclick="go('s-tailor'); initTailor(); renderTailor();">Weiter</button>
     </section>
 
     <section class="screen" id="s-tailor">
@@ -262,14 +315,53 @@
     <section class="screen" id="s-insights">
       <div class="eyebrow">INSIGHTS</div>
       <h1 class="hero" style="text-align:left;">Deine Muster</h1>
-      <div class="tabs-scroll" id="insightTabs"></div>
-      <div class="card">
-        <div class="label">MUSTER</div>
-        <div class="chartbox" id="chartBox"></div>
+      <div class="segctl">
+        <button id="viewSingleBtn" class="active" onclick="setInsightView('single')">Einzeln</button>
+        <button id="viewComboBtn" onclick="setInsightView('kombiniert')">Kombiniert</button>
       </div>
+      <div class="segctl">
+        <button id="range7Btn" class="active" onclick="setInsightRange(7)">7 Tage</button>
+        <button id="range30Btn" onclick="setInsightRange(30)">Monat</button>
+        <button id="range90Btn" onclick="setInsightRange(90)">3 Monate</button>
+      </div>
+      <div class="tabs-scroll" id="insightTabs"></div>
+      <div class="tabs-scroll" id="insightComboPicker" style="display:none;"></div>
+      <div class="tip-banner" id="cycleInsightBanner" style="display:none;"><svg class="icon" style="flex-shrink:0;margin-top:2px;"><use href="#i-warn"/></svg> NODALYS dient nicht der Verhütung und ersetzt keine Verhütungsmethode.</div>
+      <div class="card">
+        <div class="row">
+          <div class="label" style="margin-bottom:0;">MUSTER</div>
+          <button class="btn-sm btn-ghost" style="width:auto;" onclick="toggleInsightMode()" id="modeToggleBtn"><svg class="icon"><use href="#i-table"/></svg> Tabelle</button>
+        </div>
+        <div class="chartbox" id="chartBox"></div>
+        <div id="insightTableBox" style="display:none;max-height:220px;overflow-y:auto;"></div>
+        <div class="legend" id="insightLegend"></div>
+      </div>
+      <button class="btn btn-ghost" onclick="openRetroLog()"><svg class="icon"><use href="#i-calendar"/></svg> Verpasste Tage nachtragen</button>
+      <div style="height:10px;"></div>
       <div class="btn-row">
         <button class="btn btn-ghost" onclick="tryExport('pdf')">PDF-Bericht</button>
         <button class="btn btn-ghost" onclick="tryExport('csv')">CSV-Export</button>
+      </div>
+      <div style="height:10px;"></div>
+      <button class="btn btn-ghost" onclick="toggleHistorySection()"><svg class="icon"><use href="#i-chart"/></svg> Verlauf anzeigen</button>
+      <div id="historySection" style="display:none;margin-top:12px;">
+        <h1 class="hero" style="font-size:1.375rem;text-align:left;">Dein Verlauf</h1>
+        <div class="segctl">
+          <button class="active" onclick="setHistView('week',this)">Woche</button>
+          <button onclick="setHistView('month',this)">Monat</button>
+        </div>
+        <div id="histWeek" class="card">
+          <div class="label">LETZTE 7 TAGE</div>
+          <div class="daycircles" id="weekCircles"></div>
+        </div>
+        <div id="histMonth" class="card" style="display:none;">
+          <div class="row" style="margin-bottom:8px;">
+            <button class="btn-sm btn-ghost" style="width:32px;padding:6px;" onclick="shiftMonth(-1)" aria-label="Vorheriger Monat"><svg class="icon"><use href="#i-chevl"/></svg></button>
+            <div class="label" id="monthLabel" style="margin-bottom:0;">JULI 2026</div>
+            <button class="btn-sm btn-ghost" style="width:32px;padding:6px;" onclick="shiftMonth(1)" aria-label="Nächster Monat"><svg class="icon"><use href="#i-chevr"/></svg></button>
+          </div>
+          <div class="calgrid" id="calGrid"></div>
+        </div>
       </div>
       <div class="disclaimer">Kombinierte Zeitverläufe, keine statistische Korrelation.</div>
     </section>
@@ -288,6 +380,7 @@
       <div class="settings-row" onclick="openSection('modules')">Tracking-Module <span>›</span></div>
       <div class="settings-row" onclick="openSection('privacy')">Daten &amp; Datenschutz <span>›</span></div>
       <div class="settings-row" onclick="openSection('appearance')">Sprache &amp; Darstellung <span>›</span></div>
+      <div class="settings-row" onclick="openSection('notifications')">Benachrichtigungen <span>›</span></div>
       <div class="settings-row" onclick="openSection('contact')">Kontakt &amp; Q&amp;A <span>›</span></div>
       <div class="settings-row" onclick="openSection('emergency')">Hilfe / Notfall <span>›</span></div>
       <div class="settings-row" style="color:var(--rose);" onclick="doLogout()">Abmelden <span><svg class="icon"><use href="#i-logout"/></svg></span></div>
@@ -311,13 +404,17 @@ const MODS = [
   {k:'zyklus', l:'Zyklus', i:'i-cycle'}, {k:'hormone', l:'Hormone', i:'i-hormone'},
   {k:'ernaehrung', l:'Ernährung', i:'i-food'}, {k:'libido', l:'Libido', i:'i-libido'},
 ];
+const CHART_COLORS = ['#0072B2','#D55E00','#009E73','#8B7FBF','#CC79A7','#B8860B'];
 const MAX_FREE = 3;
 let state = {
-  lang:'de', name:'', gender:null, birth:null, height:null, weight:null,
-  focus:[], reason:null, medsUse:null, medsAdhs:null, cycleOptIn:null, hormonalStatus:null, hormoneOptIn:null,
+  lang:'de', name:'', gender:null, birth:null, height:null, weight:null, ageTruthConfirmed:false,
+  focus:[], reason:null, medsUse:null, medsAdhs:null, cycleOptIn:null, cycleUnderstood:false, hormonalStatus:null, hormoneOptIn:null, healthSync:false,
   modules:{fokus:false,stimmung:false,energie:false,schlaf:false,stress:false,medikation:false,zyklus:false,hormone:false,ernaehrung:false,libido:false},
   vals:{fokus:5,stimmung:5,energie:5,stress:5,schlafH:7},
-  meds:[], medsTemp:[], todayTags:[], quickCat:'mood', isPremium:false
+  meds:[], medsTemp:[], todayTags:[], quickCat:'mood', isPremium:false,
+  notif:{medsReminder:false, eveningRecap:false},
+  insightView:'single', insightRange:7, insightMode:'chart', insightCombo:[],
+  histView:'week', calMonthOffset:0
 };
 let navHist=[];
 function go(id){ const cur=document.querySelector('.screen.active'); if(cur&&cur.id!==id) navHist.push(cur.id); show(id); }
@@ -337,8 +434,18 @@ function saveProfile(){
   state.birth=document.getElementById('inpBirth').value||null;
   state.height=document.getElementById('inpHeight').value||null;
   state.weight=document.getElementById('inpWeight').value||null;
-  buildFocus(); go('s-focus');
+  buildFocus();
+  if(!state.birth){
+    document.getElementById('agegateText').textContent = 'Du hast kein Geburtsdatum angegeben.';
+    document.getElementById('agegateCheckboxText').textContent = 'Ich bestätige, dass ich mindestens 16 Jahre alt bin.';
+    go('s-agegate');
+  } else {
+    document.getElementById('agegateText').textContent = 'Bitte bestätige, dass dein angegebenes Geburtsdatum stimmt.';
+    document.getElementById('agegateCheckboxText').textContent = 'Ich bestätige, dass diese Angabe stimmt.';
+    go('s-agegate');
+  }
 }
+function afterAgegate(){ state.ageTruthConfirmed=true; go('s-focus'); }
 function buildFocus(){
   const el=document.getElementById('focusPills'); el.innerHTML='';
   let opts=[['fokus','Fokus & Konzentration'],['stimmung','Stimmung'],['energie','Energie'],['schlaf','Schlaf'],['stress','Stress'],['medikation','Medikation'],['zyklus','Zyklus'],['hormone','Hormone'],['ernaehrung','Ernährung'],['libido','Libido']];
@@ -380,7 +487,15 @@ function finishMedSetup(){
 }
 function proceedAfterMeds(){
   if(state.gender==='m'){ state.cycleOptIn='no'; goToHormoneModule(); }
-  else { buildChoices('cycleChoices',[['yes','Ja'],['no','Nein'],['later','Später']],'cycleOptIn'); go('s-cycle'); }
+  else { buildChoices('cycleChoices',[['yes','Ja'],['no','Nein'],['later','Später']],'cycleOptIn'); state.cycleUnderstood=false; document.getElementById('cycleUnderstoodBtn').classList.remove('btn-primary'); document.getElementById('cycleNextBtn').disabled=true; go('s-cycle'); }
+}
+function confirmCycleUnderstood(){
+  state.cycleUnderstood=true;
+  document.getElementById('cycleUnderstoodBtn').innerHTML='<svg class="icon"><use href="#i-check"/></svg> Verstanden';
+  document.getElementById('cycleUnderstoodBtn').style.background='var(--green-soft)';
+  document.getElementById('cycleUnderstoodBtn').style.borderColor='var(--green)';
+  document.getElementById('cycleUnderstoodBtn').style.color='var(--green)';
+  document.getElementById('cycleNextBtn').disabled=false;
 }
 function finishCycleStep(){
   state.modules.zyklus=(state.cycleOptIn==='yes');
@@ -395,6 +510,9 @@ function goToHormoneModule(){
   go('s-hormonemodule');
 }
 function finishHormoneModule(){ state.modules.hormone=(state.hormoneOptIn==='yes'); go('s-healthsync'); }
+function openHealthInfo(){
+  openModal(`<h3>Ein Profil pro Gerät</h3><p style="font-size:0.85rem;color:var(--ink-soft);line-height:1.6;">Apple Health und Google Health Connect sind geräteweit organisiert, nicht profilweit. Deshalb kann pro Gerät nur ein NODALYS-Profil Health-Daten importieren. Nutzt ihr das Gerät zu mehreren, wählt bitte bewusst, wessen Profil den Import erhält.</p>`);
+}
 function activeCount(){ return MODS.filter(m=>state.modules[m.k]).length; }
 function canEnable(k){ return state.modules[k] || state.isPremium || activeCount()<MAX_FREE; }
 function initTailor(){
@@ -411,7 +529,7 @@ function renderTailor(){
   const el=document.getElementById('tailorList'); const c=activeCount();
   el.innerHTML = `<div class="label">MODULE (${c}/${state.isPremium?'unbegrenzt':MAX_FREE})</div>` + MODS.map(m=>{
     const on=state.modules[m.k]; const locked=!on&&!canEnable(m.k);
-    return `<div class="rowline ${locked?'style="opacity:.45"':''}"><span><svg class="icon"><use href="#${m.i}"/></svg> ${m.l} ${locked?'<span class="badge-pro">PRO</span>':''}</span>
+    return `<div class="rowline" ${locked?'style="opacity:.45"':''}><span><svg class="icon"><use href="#${m.i}"/></svg> ${m.l} ${locked?'<span class="badge-pro">PRO</span>':''}</span>
     <label class="switch"><input type="checkbox" ${on?'checked':''} onchange="toggleTailor('${m.k}',this)"><span class="slider-track"></span></label></div>`;
   }).join('');
 }
@@ -477,25 +595,148 @@ function renderQuick(){
     <div class="pillwrap">${active[2].map(([k,l])=>`<span class="tagchip ${state.todayTags.includes(k)?'on':''}" onclick="toggleTag('${k}')">${l}</span>`).join('')}</div>`;
 }
 function toggleTag(k){ const i=state.todayTags.indexOf(k); if(i>-1) state.todayTags.splice(i,1); else state.todayTags.push(k); renderQuick(); }
-function renderInsights(){
-  const active=MODS.filter(m=>state.modules[m.k]);
-  document.getElementById('insightTabs').innerHTML = active.map((m,i)=>`<div class="tabpill ${i===0?'active':''}" onclick="selInsight('${m.k}',this)">${m.l}</div>`).join('');
-  if(active.length) drawChart(active[0].k);
-  else document.getElementById('chartBox').innerHTML = '<p style="font-size:0.875rem;color:var(--ink-soft);">Noch keine aktiven Module.</p>';
+
+/* ---------- INSIGHTS ---------- */
+function activeMods(){ return MODS.filter(m=>state.modules[m.k]); }
+function setInsightView(v){
+  state.insightView=v;
+  document.getElementById('viewSingleBtn').classList.toggle('active', v==='single');
+  document.getElementById('viewComboBtn').classList.toggle('active', v==='kombiniert');
+  renderInsights();
 }
-function selInsight(k, btn){ document.querySelectorAll('#insightTabs .tabpill').forEach(b=>b.classList.remove('active')); btn.classList.add('active'); drawChart(k); }
-function drawChart(key){
-  const vals=[]; for(let i=0;i<14;i++) vals.push(3+Math.round(Math.sin(i/2)*2+2));
-  const w=300,h=150,mb=18; const max=Math.max(...vals),min=Math.min(...vals),span=(max-min)||1;
-  const pts=vals.map((v,i)=>[i*(w/(vals.length-1)), mb+ (h-2*mb) - ((v-min)/span)*(h-2*mb)]);
-  let svg=`<svg viewBox="0 0 ${w} ${h}"><polyline points="${pts.map(p=>p.join(',')).join(' ')}" fill="none" stroke="var(--blue)" stroke-width="2.5"/>`;
-  pts.forEach(([x,y])=>svg+=`<circle cx="${x}" cy="${y}" r="3" fill="var(--blue)"/>`);
+function setInsightRange(n){
+  state.insightRange=n;
+  document.getElementById('range7Btn').classList.toggle('active', n===7);
+  document.getElementById('range30Btn').classList.toggle('active', n===30);
+  document.getElementById('range90Btn').classList.toggle('active', n===90);
+  renderInsights();
+}
+function toggleInsightMode(){
+  state.insightMode = state.insightMode==='chart' ? 'table' : 'chart';
+  document.getElementById('modeToggleBtn').innerHTML = state.insightMode==='chart'
+    ? '<svg class="icon"><use href="#i-table"/></svg> Tabelle' : '<svg class="icon"><use href="#i-chart"/></svg> Grafik';
+  document.getElementById('chartBox').style.display = state.insightMode==='chart' ? 'block' : 'none';
+  document.getElementById('insightTableBox').style.display = state.insightMode==='table' ? 'block' : 'none';
+  renderInsights();
+}
+function renderInsights(){
+  const active=activeMods();
+  document.getElementById('cycleInsightBanner').style.display = state.modules.zyklus ? 'flex' : 'none';
+  if(state.insightView==='single'){
+    document.getElementById('insightComboPicker').style.display='none';
+    document.getElementById('insightTabs').style.display='flex';
+    document.getElementById('insightTabs').innerHTML = active.map((m,i)=>`<div class="tabpill ${i===0?'active':''}" onclick="selInsight('${m.k}',this)">${m.l}</div>`).join('');
+    if(active.length) renderChartOrTable([active[0].k]);
+    else emptyInsights();
+  } else {
+    document.getElementById('insightTabs').style.display='none';
+    document.getElementById('insightComboPicker').style.display='flex';
+    if(!state.insightCombo.length) state.insightCombo = active.slice(0,2).map(m=>m.k);
+    document.getElementById('insightComboPicker').innerHTML = active.map(m=>`<div class="tabpill ${state.insightCombo.includes(m.k)?'active':''}" onclick="toggleCombo('${m.k}')">${m.l}</div>`).join('');
+    if(active.length) renderChartOrTable(state.insightCombo.length?state.insightCombo:[active[0].k]);
+    else emptyInsights();
+  }
+}
+function emptyInsights(){
+  document.getElementById('chartBox').innerHTML = '<p style="font-size:0.875rem;color:var(--ink-soft);">Noch keine aktiven Module.</p>';
+  document.getElementById('insightTableBox').innerHTML='';
+  document.getElementById('insightLegend').innerHTML='';
+}
+function toggleCombo(k){
+  const i=state.insightCombo.indexOf(k);
+  if(i>-1) state.insightCombo.splice(i,1); else state.insightCombo.push(k);
+  renderInsights();
+}
+function selInsight(k, btn){ document.querySelectorAll('#insightTabs .tabpill').forEach(b=>b.classList.remove('active')); btn.classList.add('active'); renderChartOrTable([k]); }
+function seriesFor(key, days){
+  const arr=[];
+  for(let i=0;i<days;i++){
+    const wave = Math.sin(i/2.3)*2*0.3 + Math.sin(i/6)*2*0.45 + Math.sin(i/23)*2*0.25;
+    arr.push(Math.max(1, Math.min(10, Math.round((5+wave)*10)/10)));
+  }
+  return arr;
+}
+function renderChartOrTable(keys){
+  document.getElementById('insightLegend').innerHTML = keys.map((k,i)=>{
+    const m=MODS.find(x=>x.k===k); const c=CHART_COLORS[i%CHART_COLORS.length];
+    return `<span><i style="background:${c};"></i>${m.l}</span>`;
+  }).join('');
+  if(state.insightMode==='chart') drawChart(keys); else drawTable(keys);
+}
+function drawChart(keys){
+  const days=state.insightRange;
+  const w=300,h=150,mb=18;
+  let svg=`<svg viewBox="0 0 ${w} ${h}">`;
+  keys.forEach((k,ci)=>{
+    const vals=seriesFor(k,Math.min(days,30));
+    const max=10,min=1,span=max-min;
+    const pts=vals.map((v,i)=>[i*(w/(vals.length-1)), mb+(h-2*mb)-((v-min)/span)*(h-2*mb)]);
+    const c=CHART_COLORS[ci%CHART_COLORS.length];
+    svg+=`<polyline points="${pts.map(p=>p.join(',')).join(' ')}" fill="none" stroke="${c}" stroke-width="2.5"/>`;
+    pts.forEach(([x,y])=>svg+=`<circle cx="${x}" cy="${y}" r="2.5" fill="${c}"/>`);
+  });
   svg+=`<line x1="0" y1="${h-mb}" x2="${w}" y2="${h-mb}" stroke="var(--sand-border)"/></svg>`;
   document.getElementById('chartBox').innerHTML = svg;
 }
-function tryExport(t){ if(!state.isPremium){ openPaywall(); return; } alert(t.toUpperCase()+'-Export gestartet (Demo).'); }
-function openPaywall(){
-  openModal(`<h3>NODALYS Premium</h3><ul style="font-size:0.875rem;padding-left:18px;line-height:1.8;"><li>Beliebig viele Module</li><li>Health-App-Import</li><li>PDF-/CSV-Export</li></ul>
+function drawTable(keys){
+  const days=Math.min(state.insightRange,14);
+  let rows='';
+  for(let i=days-1;i>=0;i--){
+    const d=new Date(); d.setDate(d.getDate()-i);
+    rows+=`<tr><td>${d.toLocaleDateString('de-DE',{day:'2-digit',month:'2-digit'})}</td>${keys.map(k=>`<td>${seriesFor(k,days)[days-1-i]}</td>`).join('')}</tr>`;
+  }
+  document.getElementById('insightTableBox').innerHTML = `<table class="datatable"><thead><tr><th>Datum</th>${keys.map(k=>`<th>${MODS.find(m=>m.k===k).l}</th>`).join('')}</tr></thead><tbody>${rows}</tbody></table>`;
+}
+function openRetroLog(){
+  const rows=[1,2,3,4,5].map(n=>{
+    const d=new Date(); d.setDate(d.getDate()-n);
+    return `<div class="rowline"><span>${d.toLocaleDateString('de-DE',{weekday:'short',day:'numeric',month:'short'})}</span>
+    <button class="btn btn-ghost btn-sm" onclick="alert('Eintrag ergänzt (Demo).'); closeModal();">Nachtragen</button></div>`;
+  }).join('');
+  openModal(`<h3>Verpasste Tage</h3>${rows}`);
+}
+function toggleHistorySection(){
+  const el=document.getElementById('historySection');
+  const show = el.style.display==='none';
+  el.style.display = show?'block':'none';
+  if(show){ renderWeekCircles(); renderCalGrid(); }
+}
+function setHistView(v, btn){
+  state.histView=v;
+  document.querySelectorAll('#historySection .segctl button').forEach(b=>b.classList.remove('active'));
+  btn.classList.add('active');
+  document.getElementById('histWeek').style.display = v==='week'?'block':'none';
+  document.getElementById('histMonth').style.display = v==='month'?'block':'none';
+  if(v==='month') renderCalGrid();
+}
+function renderWeekCircles(){
+  const dow=['Mo','Di','Mi','Do','Fr','Sa','So'];
+  let html='';
+  for(let i=6;i>=0;i--){
+    const d=new Date(); d.setDate(d.getDate()-i);
+    html+=`<div class="daycircle"><div class="dot">${d.getDate()}</div><span>${dow[(d.getDay()+6)%7]}</span></div>`;
+  }
+  document.getElementById('weekCircles').innerHTML = html;
+}
+function shiftMonth(delta){ state.calMonthOffset+=delta; renderCalGrid(); }
+function renderCalGrid(){
+  const now=new Date(); const base=new Date(now.getFullYear(), now.getMonth()+state.calMonthOffset, 1);
+  document.getElementById('monthLabel').textContent = base.toLocaleDateString('de-DE',{month:'long',year:'numeric'}).toUpperCase();
+  const firstDow=(base.getDay()+6)%7;
+  const daysInMonth=new Date(base.getFullYear(), base.getMonth()+1, 0).getDate();
+  const dow=['Mo','Di','Mi','Do','Fr','Sa','So'];
+  let html = dow.map(d=>`<div class="dow">${d}</div>`).join('');
+  for(let i=0;i<firstDow;i++) html+=`<div></div>`;
+  for(let d=1; d<=daysInMonth; d++){
+    const isToday = state.calMonthOffset===0 && d===now.getDate();
+    const has = Math.random()>0.4;
+    html+=`<div class="day ${has?'has':''} ${isToday?'today':''}">${d}</div>`;
+  }
+  document.getElementById('calGrid').innerHTML = html;
+}
+function tryExport(t){ if(!state.isPremium){ openPaywall('Export ist ein Premium-Feature.'); return; } alert(t.toUpperCase()+'-Export gestartet (Demo).'); }
+function openPaywall(msg){
+  openModal(`<h3>NODALYS Premium</h3>${msg?`<p style="font-size:0.875rem;color:var(--ink-soft);">${msg}</p>`:''}<ul style="font-size:0.875rem;padding-left:18px;line-height:1.8;"><li>Beliebig viele Module</li><li>Health-App-Import</li><li>PDF-/CSV-Export</li></ul>
   <p style="font-size:0.8125rem;color:var(--ink-soft);">30 Tage kostenlos testen.</p><button class="btn btn-primary" onclick="state.isPremium=true;closeModal();">Trial starten (Demo)</button>`);
 }
 function openSection(sec){
@@ -505,19 +746,48 @@ function openSection(sec){
     <div class="rowline"><span>Geburtsdatum</span><span>${state.birth||'–'}</span></div>
     <div class="rowline"><span>Größe</span><span>${state.height?state.height+' cm':'–'}</span></div>
     <div class="rowline"><span>Gewicht</span><span>${state.weight?state.weight+' kg':'–'}</span></div>
+    <div class="rowline"><span>Status</span><span>${state.isPremium?'Premium':'Kostenlos'}</span></div>
     <p style="font-size:0.78rem;color:var(--ink-soft);margin-top:10px;">Alle Angaben können hier jederzeit geändert werden.</p>
     <button class="btn btn-ghost" style="margin-top:6px;" onclick="closeModal(); doLogout();"><svg class="icon"><use href="#i-logout"/></svg> Abmelden</button>`;
   else if(sec==='meds') html=`<h3>Medikamente</h3>${state.meds.map(m=>`<div class="rowline"><span>${m.name}${m.dose?' · '+m.dose:''}</span></div>`).join('')||'<p style="font-size:0.875rem;color:var(--ink-soft);">Keine hinterlegt.</p>'}`;
   else if(sec==='modules') html=`<h3>Tracking-Module</h3><div id="modalModList"></div>`;
-  else if(sec==='privacy') html=`<h3>Daten &amp; Datenschutz</h3><div class="tip-banner"><svg class="icon" style="flex-shrink:0;margin-top:2px;"><use href="#i-warn"/></svg>Deine Daten liegen ausschließlich auf diesem Gerät.</div>
-    <div class="btn-row" style="margin-top:10px;"><button class="btn btn-ghost">Export</button><button class="btn btn-ghost" style="color:var(--rose);">Löschen</button></div>`;
+  else if(sec==='privacy') html=`<h3>Daten &amp; Datenschutz</h3><div class="tip-banner"><svg class="icon" style="flex-shrink:0;margin-top:2px;"><use href="#i-warn"/></svg>Deine Daten liegen ausschließlich auf diesem Gerät. Ohne Backup sind sie bei Geräteverlust unwiederbringlich weg.</div>
+    <div class="rowline"><span>FaceID / Fingerabdruck</span><label class="switch"><input type="checkbox" checked><span class="slider-track"></span></label></div>
+    <div class="rowline"><span><svg class="icon"><use href="#i-cloud"/></svg> Verschlüsseltes Backup</span><label class="switch"><input type="checkbox"><span class="slider-track"></span></label></div>
+    <p style="font-size:0.72rem;color:var(--ink-soft);margin-top:6px;">2-Datei-Redundanz (backup_a/backup_b), wöchentlich automatisch, ablegbar in deiner eigenen iCloud/Google Drive.</p>
+    <div class="btn-row" style="margin-top:10px;">
+      <button class="btn btn-ghost" onclick="tryExport('pdf')">Export</button>
+      <button class="btn btn-ghost" style="color:var(--rose);" onclick="if(confirm('Wirklich alle Daten löschen?')) alert('Gelöscht (Demo).')">Löschen</button>
+    </div>
+    <button class="btn btn-ghost" style="margin-top:10px;" onclick="alert('Von Backup wiederhergestellt (Demo).')">Von Backup wiederherstellen</button>`;
   else if(sec==='appearance') html=`<h3>Sprache &amp; Darstellung</h3>
-    <div class="rowline"><span>Dark Mode</span><label class="switch"><input type="checkbox" onchange="document.body.classList.toggle('dark',this.checked)"><span class="slider-track"></span></label></div>`;
-  else if(sec==='contact') html=`<h3>Kontakt &amp; Q&amp;A</h3><p style="font-size:0.875rem;">Kontakt: <a class="linkline" style="display:inline;margin:0;">team@nodalys.app</a></p>
-    <p style="font-size:0.72rem;color:var(--ink-soft);">Aktuell nur per E-Mail erreichbar – keine Hotline.</p>`;
-  else if(sec==='emergency') html=`<h3>Hilfe / Notfall</h3><p style="font-size:0.8125rem;color:var(--ink-soft);">NODALYS bietet keine eigene Hotline. Bei akuter Krise (Deutschland):</p>
-    <div class="rowline"><span>Akute Gefahr</span><b>112</b></div><div class="rowline"><span>TelefonSeelsorge</span><b>0800 111 0 111</b></div>`;
-  else if(sec==='premium') html=`<h3>NODALYS Premium</h3><ul style="font-size:0.875rem;padding-left:18px;line-height:1.8;"><li>Beliebig viele Module</li><li>Health-App-Import</li><li>PDF-/CSV-Export</li></ul>`;
+    <div class="rowline"><span>Dark Mode</span><label class="switch"><input type="checkbox" onchange="document.body.classList.toggle('dark',this.checked)"><span class="slider-track"></span></label></div>
+    <p style="font-size:0.72rem;color:var(--ink-soft);margin-top:6px;">Optional – nie automatisch erzwungen.</p>`;
+  else if(sec==='notifications') html=`<h3>Benachrichtigungen</h3>
+    <div class="rowline"><span>Medikamenten-Erinnerung</span><label class="switch"><input type="checkbox" ${state.notif.medsReminder?'checked':''} onchange="state.notif.medsReminder=this.checked"><span class="slider-track"></span></label></div>
+    <div class="rowline"><span>Abend-Recap</span><label class="switch"><input type="checkbox" ${state.notif.eveningRecap?'checked':''} onchange="state.notif.eveningRecap=this.checked"><span class="slider-track"></span></label></div>
+    <p style="font-size:0.78rem;color:var(--ink-soft);margin-top:8px;">Kurze Zusammenfassung deines Tages am Abend, ca. 1 Minute Lesezeit.</p>`;
+  else if(sec==='contact'){
+    const faqs=[
+      ['Ist NODALYS ein Medizinprodukt?','Nein. NODALYS sammelt und visualisiert deine Daten, stellt aber keine Diagnosen und gibt keine medizinischen Empfehlungen.'],
+      ['Werden meine Daten irgendwohin hochgeladen?','Nein, alles bleibt lokal auf deinem Gerät. Nur verschlüsselte Backups landen optional in deiner eigenen iCloud/Google Drive.'],
+      ['Kann ich meine Daten auf ein neues Handy mitnehmen?','Ja, über den verschlüsselten Backup-Export unter Daten &amp; Datenschutz.'],
+      ['Sagt mir die App, ob ich ADHS habe?','Nein. NODALYS macht nur Muster sichtbar – die Einordnung bleibt bei dir und ggf. einer Fachperson.'],
+      ['Schützt mich der Zyklus-Tracker vor einer Schwangerschaft?','Nein. NODALYS ist keine Verhütungsmethode und ersetzt keine.'],
+    ];
+    html=`<h3>Kontakt &amp; Q&amp;A</h3><p style="font-size:0.875rem;">Kontakt: <a class="linkline" style="display:inline;margin:0;">team@nodalys.app</a></p>
+    <p style="font-size:0.72rem;color:var(--ink-soft);">Aktuell nur per E-Mail erreichbar – keine Hotline.</p>
+    <div class="label" style="margin-top:14px;">Q&amp;A</div>
+    ${faqs.map(f=>`<div><div class="faq-q" onclick="this.nextElementSibling.classList.toggle('open')">${f[0]}</div><div class="faq-a">${f[1]}</div></div>`).join('')}`;
+  }
+  else if(sec==='emergency') html=`<h3>Hilfe / Notfall</h3><p style="font-size:0.8125rem;color:var(--ink-soft);">NODALYS bietet keine eigene Hotline. Bei akuter psychischer Belastung oder Krise helfen diese kostenlosen, unabhängigen Stellen (Deutschland):</p>
+    <div class="rowline"><span>Akute Gefahr</span><b>112</b></div>
+    <div class="rowline"><span>TelefonSeelsorge (kostenlos, 24/7)</span><b>0800 111 0 111</b></div>
+    <div class="rowline"><span>TelefonSeelsorge</span><b>116 123</b></div>
+    <p style="font-size:0.72rem;color:var(--ink-soft);margin-top:10px;">Außerhalb Deutschlands: bitte die lokale Notrufnummer deines Landes nutzen.</p>`;
+  else if(sec==='premium') html=`<h3>NODALYS Premium ${state.isPremium?'<span class="badge-ok">AKTIV</span>':''}</h3><ul style="font-size:0.875rem;padding-left:18px;line-height:1.8;"><li>Beliebig viele Module gleichzeitig</li><li>Health-App-Import</li><li>PDF-Berichte &amp; CSV-Export</li></ul>
+    <div class="rowline"><span>Premium aktiv (Demo)</span><label class="switch"><input type="checkbox" ${state.isPremium?'checked':''} onchange="state.isPremium=this.checked; openSection('premium');"><span class="slider-track"></span></label></div>
+    <p style="font-size:0.72rem;color:var(--ink-soft);margin-top:10px;">Kauf &amp; Verlängerung laufen über App Store/Play Store – kein eigenes Zahlungssystem, Wiederherstellung über "Käufe wiederherstellen".</p>`;
   openModal(html);
   if(sec==='modules'){
     document.getElementById('modalModList').innerHTML = MODS.map(m=>`<div class="rowline"><span><svg class="icon"><use href="#${m.i}"/></svg> ${m.l}</span>
