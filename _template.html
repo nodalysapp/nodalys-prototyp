@@ -1,0 +1,1258 @@
+<!DOCTYPE html>
+<html lang="de">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>NODALYS – Prototyp (__VERSION_LABEL__)</title>
+<style>
+:root{
+  --radius:20px; --radius-sm:12px;
+  --sand:#EAE1CE; --sand-card:#F4EDDD; --sand-border:#DED2B7;
+  --ink:#332E27; --ink-soft:#7A7263; --ink-faint:#A69E8C;
+  --blue:#54628F; --blue-soft:#DCE1EE;
+  --red:#C0808A; --red-soft:#F1DEE0;
+  --green:#6E8F6E; --green-soft:#DEE7DA;
+  --purple:#8B7FBF; --purple-soft:#E4DFF3;
+  --gold:#D8A657; --gold-soft:#F1E3C7;
+  --font-head:Georgia,'Times New Roman',serif;
+  --font-body:-apple-system,BlinkMacSystemFont,'Segoe UI',Roboto,Helvetica,Arial,sans-serif;
+}
+/* Kinder-Interface: eigenständige Farbwelt gemäß Abschnitt 4 – nur Blau und Rot(=Rose) weichen
+   von der Erwachsenenversion ab, Sand/Ink/Grün/Lila/Gold sind laut Spec identisch, Gold kommt
+   in der Erwachsenenversion überhaupt nicht vor (dort nur Blau/Rose/Grün/Lila). */
+body.kids{
+  --radius:28px; --radius-sm:18px;
+  --blue:#4A9BB0; --blue-soft:#DCEFF0;
+  --red:#BC6B5A; --red-soft:#F0DCD3;
+}
+body.dark{
+  --sand:#221F1B; --sand-card:#2B2721; --sand-border:#3A352C;
+  --ink:#EDE6D8; --ink-soft:#B5AC9A; --ink-faint:#847C6C;
+  --blue-soft:#33394A; --red-soft:#3E2E30; --green-soft:#2C332C; --purple-soft:#332E45; --gold-soft:#3B331F;
+}
+*{box-sizing:border-box;}
+body{margin:0;font-family:var(--font-body);background:#0f0e0c;display:flex;justify-content:center;align-items:flex-start;padding:24px;min-height:100vh;}
+h1,h2,h3,.serif{font-family:var(--font-head);}
+.phone{width:400px;max-width:100%;background:var(--sand);border-radius:44px;border:10px solid #111;box-shadow:0 20px 60px rgba(0,0,0,.5);overflow:hidden;position:relative;color:var(--ink);transition:background .2s,color .2s;}
+.statusbar{display:flex;justify-content:space-between;padding:10px 24px 4px;font-size:12px;color:var(--ink);font-weight:600;}
+.topbar{display:flex;align-items:center;justify-content:space-between;padding:4px 18px;min-height:40px;}
+.iconbtn{width:34px;height:34px;border-radius:50%;background:var(--sand-card);border:1px solid var(--sand-border);display:flex;align-items:center;justify-content:center;cursor:pointer;color:var(--ink);}
+.iconbtn:active{transform:scale(.94);}
+.langbtn{border:1px solid var(--sand-border);background:var(--sand-card);border-radius:999px;padding:6px 12px;font-size:12px;font-weight:700;cursor:pointer;color:var(--ink);letter-spacing:.03em;}
+.screen{padding:8px 20px 100px;min-height:560px;max-height:78vh;overflow-y:auto;}
+.screen.center{display:flex;flex-direction:column;justify-content:center;align-items:center;text-align:center;min-height:560px;}
+.badge-disclaimer{font-size:11px;color:var(--ink-faint);border:1px solid var(--sand-border);border-radius:999px;padding:6px 12px;display:inline-block;margin-top:10px;}
+.card{background:var(--sand-card);border:1px solid var(--sand-border);border-radius:var(--radius);padding:16px;margin-bottom:14px;}
+.card h3{margin:0 0 8px;font-size:15px;}
+.btn{width:100%;padding:14px;border-radius:var(--radius-sm);border:none;background:var(--ink);color:var(--sand);font-size:15px;font-weight:600;cursor:pointer;font-family:var(--font-body);}
+.btn:active{opacity:.85;}
+.btn.secondary{background:transparent;border:1px solid var(--sand-border);color:var(--ink);}
+.btn.small{width:auto;padding:8px 14px;font-size:13px;}
+.btn[disabled]{opacity:.4;cursor:not-allowed;}
+input[type=text],input[type=number],input[type=date],select,textarea{width:100%;padding:12px;border-radius:var(--radius-sm);border:1px solid var(--sand-border);background:var(--sand);color:var(--ink);font-size:14px;font-family:var(--font-body);margin-top:6px;}
+label{font-size:12px;color:var(--ink-soft);font-weight:600;display:block;margin-top:10px;}
+.pill{display:inline-block;padding:9px 14px;border-radius:999px;border:1px solid var(--sand-border);background:var(--sand-card);font-size:13px;margin:4px 6px 0 0;cursor:pointer;color:var(--ink);}
+.pill.active{background:var(--ink);color:var(--sand);border-color:var(--ink);}
+.pillrow{margin-bottom:10px;}
+.opt{display:block;width:100%;text-align:left;padding:13px 16px;border-radius:var(--radius-sm);border:1px solid var(--sand-border);background:var(--sand-card);margin-bottom:8px;cursor:pointer;color:var(--ink);font-size:14px;font-family:var(--font-body);}
+.opt.active{border-color:var(--ink);background:var(--blue-soft);font-weight:700;}
+.progress{display:flex;gap:4px;margin:10px 0 18px;}
+.progress span{height:4px;flex:1;border-radius:2px;background:var(--sand-border);}
+.progress span.done{background:var(--ink);}
+.tile-row{display:flex;gap:8px;margin:8px 0 2px;}
+.tile{flex:1;aspect-ratio:1;border-radius:var(--radius-sm);border:1px solid var(--sand-border);background:var(--sand);display:flex;align-items:center;justify-content:center;font-weight:700;cursor:pointer;font-family:var(--font-head);font-size:16px;color:var(--ink);}
+.tile.active{background:var(--ink);color:var(--sand);}
+.anchors{display:flex;justify-content:space-between;font-size:10px;color:var(--ink-faint);margin-top:2px;}
+.rowline{display:flex;justify-content:space-between;align-items:center;padding:14px 4px;border-bottom:1px solid var(--sand-border);cursor:pointer;}
+.rowline:last-child{border-bottom:none;}
+.rowline .lab{display:flex;align-items:center;gap:10px;font-size:14px;}
+.chev{color:var(--ink-faint);}
+.toggle{width:44px;height:26px;border-radius:999px;background:var(--sand-border);position:relative;cursor:pointer;flex-shrink:0;}
+.toggle.on{background:var(--green);}
+.toggle .dot{width:20px;height:20px;border-radius:50%;background:#fff;position:absolute;top:3px;left:3px;transition:left .15s;}
+.toggle.on .dot{left:21px;}
+.qt-scroll{display:flex;gap:8px;overflow-x:auto;padding:4px 0 10px;}
+.qt-chip{flex-shrink:0;padding:9px 14px;border-radius:999px;border:1px solid var(--sand-border);background:var(--sand-card);font-size:12px;white-space:nowrap;cursor:pointer;color:var(--ink);}
+/* Erwachsenenversion: aktiver Quick-Track-Chip in Ink (kein Gold, Abschnitt 4 kennt dort kein Gold). */
+.qt-chip.active{background:var(--ink);color:var(--sand);border-color:var(--ink);}
+/* Kinderversion: darf Gold nutzen, das gehört zu ihrer eigenen Palette. */
+body.kids .qt-chip.active{background:var(--gold);color:#1c1a16;border-color:var(--gold);}
+.bottomnav{position:absolute;bottom:0;left:0;right:0;display:flex;background:var(--sand-card);border-top:1px solid var(--sand-border);padding:10px 8px calc(10px + env(safe-area-inset-bottom));}
+.navitem{flex:1;display:flex;flex-direction:column;align-items:center;gap:4px;cursor:pointer;color:var(--ink-faint);font-size:10px;font-weight:700;}
+.navitem.active{color:var(--ink);}
+.navitem svg{width:22px;height:22px;}
+.modal-backdrop{position:absolute;inset:0;background:rgba(0,0,0,.45);display:flex;align-items:flex-end;z-index:50;}
+.modal{background:var(--sand);width:100%;max-height:85%;overflow-y:auto;border-radius:24px 24px 0 0;padding:20px;}
+.modal h2{margin-top:4px;}
+.toast{position:absolute;top:50%;left:50%;transform:translate(-50%,-50%);background:var(--ink);color:var(--sand);padding:12px 20px;border-radius:999px;font-size:13px;font-weight:600;z-index:99;opacity:0;pointer-events:none;transition:opacity .2s;}
+.toast.show{opacity:1;}
+.disc-bottom{position:absolute;bottom:78px;left:0;right:0;text-align:center;font-size:10px;color:var(--ink-faint);padding:0 20px;}
+.icon{width:26px;height:26px;display:inline-block;vertical-align:middle;}
+.mod-icon{width:38px;height:38px;border-radius:50%;display:flex;align-items:center;justify-content:center;flex-shrink:0;}
+.faq-item{border-bottom:1px solid var(--sand-border);padding:10px 0;}
+.faq-q{font-weight:700;font-size:13px;cursor:pointer;}
+.faq-a{font-size:13px;color:var(--ink-soft);margin-top:6px;display:none;}
+.faq-item.open .faq-a{display:block;}
+.chartwrap{background:var(--sand-card);border:1px solid var(--sand-border);border-radius:var(--radius);padding:14px;margin-bottom:14px;}
+.legend{display:flex;flex-wrap:wrap;gap:10px;font-size:11px;margin-top:8px;}
+.legend span{display:inline-flex;align-items:center;gap:5px;}
+.legend i{width:10px;height:10px;border-radius:2px;display:inline-block;}
+.banner{background:var(--red-soft);border:1px solid var(--red);border-radius:var(--radius-sm);padding:12px;font-size:12px;margin-bottom:12px;}
+.info-note{font-size:11px;color:var(--ink-faint);background:var(--sand-card);border:1px dashed var(--sand-border);border-radius:var(--radius-sm);padding:10px;margin-top:8px;}
+.calgrid{display:grid;grid-template-columns:repeat(7,1fr);gap:6px;margin-top:10px;}
+.calday{aspect-ratio:1;border-radius:8px;background:var(--sand-card);display:flex;align-items:center;justify-content:center;font-size:11px;position:relative;}
+.calday.today{border:2px solid var(--ink);}
+.calday .dot{width:5px;height:5px;border-radius:50%;background:var(--blue);position:absolute;bottom:4px;}
+::-webkit-scrollbar{width:0;height:0;}
+</style>
+</head>
+<body class="__BODY_CLASS__">
+<div class="phone" id="phone">
+  <div id="app"></div>
+  <div class="toast" id="toast"></div>
+</div>
+<script>
+const VERSION = "__VERSION__"; // 'ab18' | 'kinder-eltern' | 'kinder'
+const IS_KIDS = VERSION !== 'ab18';
+const SHOW_PARENT_SCREENS = VERSION === 'kinder-eltern';
+
+const DICT = {
+de:{
+  brand:"NODALYS",
+  claim:"100% Lokal & Privat",
+  welcome_sub_ab18:"Erfasse persönliche Faktoren wie Fokus, Stimmung, Energie, Schlaf oder Medikation – ganz ohne Bewertung. Alle Daten bleiben auf deinem Gerät.",
+  welcome_sub_kids:"Trage ein, wie dein Tag war – Konzentration, Stimmung, Schlaf. Alles bleibt privat auf diesem Gerät.",
+  disclaimer:"Kein Medizinprodukt – dient nicht der Diagnose oder Behandlung.",
+  start:"Loslassen & starten",
+  back:"Zurück",
+  weiter:"Weiter",
+  skip:"Überspringen",
+  later_settings:"Später in den Einstellungen",
+  step_name_title:"Wie heißt du?",
+  step_name_ph:"Dein Name",
+  step_profile_title:"Dein Profil",
+  gender_w:"Weiblich", gender_m:"Männlich", gender_d:"Divers", gender_k:"Keine Angabe",
+  gender_id_label:"Biologisches Geschlecht (getrennt von Geschlechtsidentität)",
+  height_label:"Größe in cm (optional)",
+  weight_label:"Gewicht in kg (optional)",
+  birthdate_label:"Geburtsdatum",
+  birthdate_skip:"Geburtsdatum weglassen",
+  age_confirm:"Ich bestätige, dass ich mindestens 16 Jahre alt bin.",
+  age_truth_confirm:"Ich bestätige, dass diese Angabe stimmt.",
+  step_parent_title:"Einwilligung der Erziehungsberechtigten",
+  parent_intro:"Da das angegebene Alter unter 16 Jahren liegt, benötigen wir die Einwilligung einer erziehungsberechtigten Person (Art. 8 DSGVO).",
+  parent_name_label:"Name der erziehungsberechtigten Person",
+  parent_consent_check:"Ich bin erziehungsberechtigt und willige in die Nutzung von NODALYS durch mein Kind ein.",
+  parent_proto_note:"Prototyp-Hinweis: Dies ist aktuell eine reine Selbstauskunft ohne Identitätsprüfung.",
+  confirm:"Bestätigen",
+  step_focus_title:"Was möchtest du im Blick behalten?",
+  focus_fokus:"Fokus", focus_stimmung:"Stimmung", focus_energie:"Energie", focus_schlaf:"Schlaf", focus_stress:"Stress",
+  focus_medikation:"Medikation", focus_zyklus:"Zyklus", focus_hormone:"Hormone", focus_ernaehrung:"Ernährung", focus_libido:"Libido",
+  step_reason_title:"Was passt am besten?",
+  reason_have:"Ich habe ADHS",
+  reason_suspect:"Ich vermute ADHS",
+  reason_clarify:"Ich befinde mich in Abklärung",
+  reason_general:"Ich möchte meine Muster allgemein verstehen",
+  step_med_q_title_adhd:"Nutzt du ADHS-Medikamente?",
+  step_med_q_title_general:"Nimmst du Medikamente?",
+  med_yes:"Ja", med_sometimes:"Manchmal", med_no:"Nein", med_unknown:"Keine Angabe",
+  step_medadd_title:"Medikament hinzufügen",
+  med_name_label:"Wirkstoff",
+  med_name_ph:"z. B. Methylphenidat",
+  med_dose_label:"Dosis (optional)",
+  med_freq_label:"Häufigkeit pro Tag",
+  add_more_med:"+ Weiteres Medikament speichern",
+  step_cycle_title:"Möchtest du deinen Zyklus tracken?",
+  cycle_yes:"Ja", cycle_no:"Nein", cycle_later:"Später",
+  cycle_banner:"NODALYS dient nicht der Verhütung.",
+  cycle_banner_confirm:"Verstanden",
+  step_hormonal_title:"Dein hormoneller Status",
+  horm_contra:"Verhütung", horm_preg:"Schwangerschaft", horm_peri:"Perimenopause", horm_none:"Keiner",
+  step_generalhormone_title:"Allgemeines Hormone-Modul aktivieren?",
+  generalhormone_sub_adult_f:"z. B. Pubertät, Wechseljahre",
+  generalhormone_sub_adult_m:"z. B. Pubertät, Testosteron",
+  generalhormone_sub_kids:"z. B. Pubertät",
+  step_health_title:"Health-App verbinden",
+  health_sub_ios:"Apple Health oder Google Health Connect verbinden – einseitig, jederzeit widerrufbar.",
+  health_info:"Pro Gerät kann nur ein Profil Health-Daten importieren, da HealthKit/Health Connect geräteweit organisiert sind.",
+  health_connect:"Verbinden",
+  step_reminders_title:"Erinnerungen",
+  rem_med:"Medikamenten-Erinnerung",
+  rem_med_sub:"Fragt täglich, ob die Einnahme erfolgt ist – erzeugt bei Bestätigung automatisch einen Tages-Log-Eintrag.",
+  rem_recap:"Abend-Recap",
+  rem_recap_sub:"Kurzer Hinweis am Abend, den Tag einzutragen.",
+  step_modules_title:"Tracking anpassen",
+  modules_sub:"Wähle bis zu 3 Module kostenlos – weitere sind Teil von Premium und jederzeit in den Einstellungen änderbar.",
+  pro:"PRO",
+  step_finish_title:"Bereit!",
+  finish_sub:"Deine aktiven Module:",
+  open_app:"App öffnen",
+  nav_today:"Heute",
+  nav_insights_adult:"Insights",
+  nav_insights_kids:"Einblicke",
+  nav_settings:"Einstellungen",
+  today_disclaimer:"Kein Medizinprodukt",
+  saved:"Gespeichert ✓",
+  sleep_title:"Schlaf",
+  sleep_hours:"Stunden",
+  sleep_quality:"Qualität",
+  q_bad:"Schlecht", q_ok:"Okay", q_good:"Gut", q_super:"Super",
+  quicktrack:"Quick Track",
+  qt_custom:"+ Eigener Tag",
+  med_taken:"Genommen",
+  med_taken_of:"heute genommen",
+  view_single:"Einzeln",
+  view_combined:"Kombiniert",
+  range_7:"7 Tage", range_month:"Monat", range_3m:"3 Monate",
+  chart_view:"Diagramm", table_view:"Tabelle",
+  missed_days:"Verpasste Tage nachtragen",
+  export_pdf:"PDF-Bericht",
+  export_csv:"CSV-Export",
+  history_title:"Verlauf",
+  history_week:"Woche", history_month:"Monat",
+  today_jump:"Zu heute springen",
+  cycle_disclaimer_insights:"Zyklus-Daten sichtbar – NODALYS dient nicht der Verhütung.",
+  pdf_footer:"Diese Darstellung zeigt persönliche Datenmuster und ersetzt keine medizinische Bewertung.",
+  settings_unlock_premium:"Premium freischalten",
+  settings_profile:"Nutzerprofil",
+  settings_meds:"Medikamente",
+  settings_modules:"Tracking-Module",
+  settings_privacy:"Daten & Datenschutz",
+  settings_display:"Sprache & Darstellung",
+  settings_notif:"Benachrichtigungen",
+  settings_contact:"Kontakt & Q&A",
+  settings_help:"Hilfe/Notfall",
+  settings_premium:"Premium",
+  settings_parentpin:"Eltern-PIN & Einwilligung",
+  settings_proxy:"Proxy-Tracking",
+  close:"Schließen",
+  revoke_consent:"Einwilligung widerrufen",
+  proto_note_meds:"Prototyp-Hinweis: Hinzufügen erfolgt aktuell über einen einfachen Dialog, kein finales UI.",
+  privacy_device_only:"Alle Daten werden ausschließlich auf diesem Gerät gespeichert.",
+  faceid:"FaceID / Fingerabdruck",
+  enc_backup:"Verschlüsseltes Backup (wöchentlich, 2-Datei-Redundanz)",
+  backup_warning:"Ohne Backup gehen deine Daten bei Verlust des Geräts unwiederbringlich verloren.",
+  restore_backup:"Von Backup wiederherstellen",
+  delete_data:"Alle Daten löschen",
+  dark_mode:"Dark Mode",
+  language:"Sprache",
+  contact_email:"Kontakt: support@nodalys.app",
+  emergency_112:"Notruf: 112",
+  emergency_seelsorge:"TelefonSeelsorge: 0800 111 0 111 / 116 123",
+  emergency_kummer:"Nummer gegen Kummer (für Kinder & Jugendliche): 116 111",
+  emergency_eltern:"Elterntelefon: 0800 111 0 550",
+  emergency_intl:"Außerhalb Deutschlands gelten lokale Notrufnummern.",
+  premium_title:"NODALYS Premium",
+  premium_price:"6€ / Monat · 30 Tage kostenlos testen",
+  premium_feat1:"Unbegrenzte Tracking-Module",
+  premium_feat2:"Health-App-Import",
+  premium_feat3:"Erweiterte Multi-Faktor-Graphen inkl. Wechsel-Marker",
+  premium_feat4:"PDF-Berichte & CSV-Export",
+  premium_store_note:"Ein echter Kauf läuft ausschließlich über den App-/Play-Store.",
+  premium_demo_toggle:"Demo: Premium simulieren",
+  pin_required:"Benötigt Eltern-PIN",
+  parentpin_intro:"Die Eltern-PIN sichert Premium-Käufe, die Aktivierung des Zyklus-Moduls und den Health-App-Import bis zum 16. Geburtstag ab – unabhängig davon, ob die Oberfläche bereits im Erwachsenen-Design läuft.",
+  set_pin:"PIN festlegen",
+  proxy_intro:"Eltern können stellvertretend für das Kind Einträge vornehmen. Jeder Eintrag wird als „von Elternteil eingetragen“ markiert.",
+  proxy_toggle:"Proxy-Tracking aktiv",
+  age_stage_label:"Altersstufe",
+  stage_4_8:"4–8 Jahre – Eltern-Proxy",
+  stage_5_6:"5–6 Jahre – Proxy optional",
+  stage_9_12:"9–12 Jahre – Self-Report Standard",
+  stage_13_15:"13–15 Jahre – Erwachsenen-Interface, Consent bleibt bis 16",
+  parent_managed_note:"Diese Einstellung wird von einer erziehungsberechtigten Person verwaltet.",
+  kids_area_teaser_title:"Kinderbereich in der Familie",
+  kids_area_teaser_text:"Für Kinder in deiner Familie lässt sich ein eigenes, altersgerechtes Kinderprofil einrichten – mit Eltern-Proxy-Tracking, eigener Farbwelt und Eltern-PIN. Details siehe separate Kinderversion.",
+  faq_q1:"Ist NODALYS ein Medizinprodukt?",
+  faq_a1:"Nein. NODALYS dient ausschließlich der persönlichen Selbstbeobachtung, nicht der Diagnose oder Behandlung.",
+  faq_q2:"Wo werden meine Daten gespeichert?",
+  faq_a2:"Ausschließlich lokal auf deinem Gerät. Es gibt keinen Pflicht-Server für Gesundheitsdaten.",
+  faq_q3:"Wie ziehe ich auf ein neues Gerät um?",
+  faq_a3:"Über ein verschlüsseltes Backup (z. B. iCloud/Google Drive) lässt sich der Umzug jederzeit durchführen.",
+  faq_q4:"Erkennt die App ADHS?",
+  faq_a4:"Nein. Die App bewertet, interpretiert oder diagnostiziert nichts – sie zeigt ausschließlich neutrale Zeitverläufe.",
+  faq_q5:"Ist der Zyklus-Tracker eine Verhütungsmethode?",
+  faq_a5:"Nein, ausdrücklich nicht. NODALYS dient nicht der Verhütung.",
+  medmod_taken_toast:"Eintrag im Tages-Log gespeichert",
+},
+en:{
+  brand:"NODALYS",
+  claim:"100% Local & Private",
+  welcome_sub_ab18:"Track personal factors like focus, mood, energy, sleep or medication – without any interpretation. All data stays on your device.",
+  welcome_sub_kids:"Log how your day went – focus, mood, sleep. Everything stays private on this device.",
+  disclaimer:"Not a medical device – not for diagnosis or treatment.",
+  start:"Get started",
+  back:"Back",
+  weiter:"Next",
+  skip:"Skip",
+  later_settings:"Later in settings",
+  step_name_title:"What's your name?",
+  step_name_ph:"Your name",
+  step_profile_title:"Your profile",
+  gender_w:"Female", gender_m:"Male", gender_d:"Non-binary", gender_k:"Prefer not to say",
+  gender_id_label:"Biological sex (separate from gender identity)",
+  height_label:"Height in cm (optional)",
+  weight_label:"Weight in kg (optional)",
+  birthdate_label:"Date of birth",
+  birthdate_skip:"Skip date of birth",
+  age_confirm:"I confirm that I am at least 16 years old.",
+  age_truth_confirm:"I confirm that this information is accurate.",
+  step_parent_title:"Parental consent",
+  parent_intro:"Since the given age is under 16, we need consent from a parent or legal guardian (GDPR Art. 8).",
+  parent_name_label:"Name of parent / legal guardian",
+  parent_consent_check:"I am the legal guardian and consent to my child using NODALYS.",
+  parent_proto_note:"Prototype note: this is currently self-reported only, without identity verification.",
+  confirm:"Confirm",
+  step_focus_title:"What would you like to keep an eye on?",
+  focus_fokus:"Focus", focus_stimmung:"Mood", focus_energie:"Energy", focus_schlaf:"Sleep", focus_stress:"Stress",
+  focus_medikation:"Medication", focus_zyklus:"Cycle", focus_hormone:"Hormones", focus_ernaehrung:"Nutrition", focus_libido:"Libido",
+  step_reason_title:"What fits best?",
+  reason_have:"I have ADHD",
+  reason_suspect:"I suspect I have ADHD",
+  reason_clarify:"I'm currently in diagnostic clarification",
+  reason_general:"I want to understand my patterns generally",
+  step_med_q_title_adhd:"Do you use ADHD medication?",
+  step_med_q_title_general:"Do you take medication?",
+  med_yes:"Yes", med_sometimes:"Sometimes", med_no:"No", med_unknown:"Prefer not to say",
+  step_medadd_title:"Add medication",
+  med_name_label:"Active ingredient",
+  med_name_ph:"e.g. Methylphenidate",
+  med_dose_label:"Dose (optional)",
+  med_freq_label:"Frequency per day",
+  add_more_med:"+ Save another medication",
+  step_cycle_title:"Would you like to track your cycle?",
+  cycle_yes:"Yes", cycle_no:"No", cycle_later:"Later",
+  cycle_banner:"NODALYS is not a contraception method.",
+  cycle_banner_confirm:"Understood",
+  step_hormonal_title:"Your hormonal status",
+  horm_contra:"Contraception", horm_preg:"Pregnancy", horm_peri:"Perimenopause", horm_none:"None",
+  step_generalhormone_title:"Enable general hormone module?",
+  generalhormone_sub_adult_f:"e.g. puberty, menopause",
+  generalhormone_sub_adult_m:"e.g. puberty, testosterone",
+  generalhormone_sub_kids:"e.g. puberty",
+  step_health_title:"Connect health app",
+  health_sub_ios:"Connect Apple Health or Google Health Connect – one-way, revocable anytime.",
+  health_info:"Only one profile per device can import health data, since HealthKit/Health Connect are organized device-wide.",
+  health_connect:"Connect",
+  step_reminders_title:"Reminders",
+  rem_med:"Medication reminder",
+  rem_med_sub:"Asks daily whether medication was taken – confirming automatically creates a daily log entry.",
+  rem_recap:"Evening recap",
+  rem_recap_sub:"A short evening nudge to log the day.",
+  step_modules_title:"Customize tracking",
+  modules_sub:"Choose up to 3 modules for free – more are part of Premium and can be changed anytime in settings.",
+  pro:"PRO",
+  step_finish_title:"Ready!",
+  finish_sub:"Your active modules:",
+  open_app:"Open app",
+  nav_today:"Today",
+  nav_insights_adult:"Insights",
+  nav_insights_kids:"Insights",
+  nav_settings:"Settings",
+  today_disclaimer:"Not a medical device",
+  saved:"Saved ✓",
+  sleep_title:"Sleep",
+  sleep_hours:"Hours",
+  sleep_quality:"Quality",
+  q_bad:"Poor", q_ok:"Okay", q_good:"Good", q_super:"Great",
+  quicktrack:"Quick Track",
+  qt_custom:"+ Custom tag",
+  med_taken:"Taken",
+  med_taken_of:"taken today",
+  view_single:"Single",
+  view_combined:"Combined",
+  range_7:"7 days", range_month:"Month", range_3m:"3 months",
+  chart_view:"Chart", table_view:"Table",
+  missed_days:"Log missed days",
+  export_pdf:"PDF report",
+  export_csv:"CSV export",
+  history_title:"History",
+  history_week:"Week", history_month:"Month",
+  today_jump:"Jump to today",
+  cycle_disclaimer_insights:"Cycle data visible – NODALYS is not a contraception method.",
+  pdf_footer:"This view shows personal data patterns and does not replace a medical assessment.",
+  settings_unlock_premium:"Unlock Premium",
+  settings_profile:"User profile",
+  settings_meds:"Medications",
+  settings_modules:"Tracking modules",
+  settings_privacy:"Data & privacy",
+  settings_display:"Language & display",
+  settings_notif:"Notifications",
+  settings_contact:"Contact & Q&A",
+  settings_help:"Help / emergency",
+  settings_premium:"Premium",
+  settings_parentpin:"Parent PIN & consent",
+  settings_proxy:"Proxy tracking",
+  close:"Close",
+  revoke_consent:"Revoke consent",
+  proto_note_meds:"Prototype note: adding is currently done via a simple dialog, not final UI.",
+  privacy_device_only:"All data is stored exclusively on this device.",
+  faceid:"FaceID / fingerprint",
+  enc_backup:"Encrypted backup (weekly, 2-file redundancy)",
+  backup_warning:"Without backup, your data is unrecoverably lost if the device is lost.",
+  restore_backup:"Restore from backup",
+  delete_data:"Delete all data",
+  dark_mode:"Dark mode",
+  language:"Language",
+  contact_email:"Contact: support@nodalys.app",
+  emergency_112:"Emergency: 112",
+  emergency_seelsorge:"Telephone counselling: 0800 111 0 111 / 116 123",
+  emergency_kummer:"Helpline for children & teens: 116 111",
+  emergency_eltern:"Parents' helpline: 0800 111 0 550",
+  emergency_intl:"Outside Germany, local emergency numbers apply.",
+  premium_title:"NODALYS Premium",
+  premium_price:"€6 / month · 30-day free trial",
+  premium_feat1:"Unlimited tracking modules",
+  premium_feat2:"Health app import",
+  premium_feat3:"Advanced multi-factor graphs incl. change markers",
+  premium_feat4:"PDF reports & CSV export",
+  premium_store_note:"An actual purchase always runs via the App/Play Store.",
+  premium_demo_toggle:"Demo: simulate premium",
+  pin_required:"Requires parent PIN",
+  parentpin_intro:"The parent PIN protects premium purchases, cycle module activation and health app import until age 16 – regardless of whether the interface already runs in adult design.",
+  set_pin:"Set PIN",
+  proxy_intro:"Parents can log entries on behalf of the child. Each entry is marked as “logged by parent”.",
+  proxy_toggle:"Proxy tracking active",
+  age_stage_label:"Age stage",
+  stage_4_8:"4–8 years – parent proxy",
+  stage_5_6:"5–6 years – proxy optional",
+  stage_9_12:"9–12 years – self-report standard",
+  stage_13_15:"13–15 years – adult interface, consent remains until 16",
+  parent_managed_note:"This setting is managed by a parent or legal guardian.",
+  kids_area_teaser_title:"Kids area for the family",
+  kids_area_teaser_text:"A separate, age-appropriate child profile can be set up for children in your family – with parent proxy tracking, its own color world and a parent PIN. See the dedicated kids version for details.",
+  faq_q1:"Is NODALYS a medical device?",
+  faq_a1:"No. NODALYS is solely for personal self-observation, not for diagnosis or treatment.",
+  faq_q2:"Where is my data stored?",
+  faq_a2:"Exclusively locally on your device. There is no mandatory server for health data.",
+  faq_q3:"How do I move to a new device?",
+  faq_a3:"An encrypted backup (e.g. iCloud/Google Drive) lets you migrate anytime.",
+  faq_q4:"Does the app detect ADHD?",
+  faq_a4:"No. The app never evaluates, interprets or diagnoses – it only shows neutral timelines.",
+  faq_q5:"Is the cycle tracker a contraception method?",
+  faq_a5:"No, explicitly not. NODALYS is not a contraception method.",
+  medmod_taken_toast:"Entry saved to daily log",
+}
+};
+
+const MODULES = [
+  {id:'fokus', icon:'zigzag'},
+  {id:'stimmung', icon:'blob'},
+  {id:'energie', icon:'bolt'},
+  {id:'schlaf', icon:'moon'},
+  {id:'stress', icon:'cloud'},
+  {id:'ernaehrung', icon:'plate'},
+  {id:'bewegung', icon:'shoe'},
+  {id:'zyklus', icon:'drop'},
+  {id:'medikation', icon:'pill'},
+  {id:'libido', icon:'blob'},
+  {id: IS_KIDS ? 'schule' : 'arbeituni', icon:'book'},
+];
+// Erwachsenenversion (Abschnitt 4): nur Blau / Rose(=Rot) / Grün / Lila – bewusst KEIN Gold.
+// Kinderversion (Abschnitt 4): zusätzlich Gold in der eigenen Palette.
+const ACCENTS = IS_KIDS ? ['blue','red','green','purple','gold'] : ['blue','red','green','purple'];
+function moduleColor(id){
+  const idx = MODULES.findIndex(m=>m.id===id);
+  return ACCENTS[(idx<0?0:idx) % ACCENTS.length];
+}
+function proBadgeStyle(){
+  return IS_KIDS ? 'background:var(--gold);color:#1c1a16;' : 'background:var(--ink);color:var(--sand);';
+}
+
+let state = {
+  lang:'de', dark:false, screen:'welcome', history:[],
+  ob:{ name:'', gender:null, birthdate:'', ageSkip:false, ageConfirm16:false, ageTruth:false, height:'', weight:'',
+       parentName:'', parentConsent:false,
+       focus:[], reason:null, medStatus:null, meds:[], medDraft:{name:'',dose:'',freq:'1'},
+       cycleOptIn:null, cycleBannerOk:false, hormonalStatus:null, generalHormone:null,
+       healthSync:false, remMed:false, remRecap:false, modules:[] },
+  ageStage:null, isMinor:false,
+  today:{fokus:null, stimmung:null, energie:null, stress:null, sleepH:7, sleepQ:2, medTaken:0, qt:[]},
+  premium:false, trialLeft:30,
+  insights:{mode:'single', range:'7', activeModuleTab:null, combined:[], chartOrTable:'chart', historyView:'week', monthOffset:0},
+  activeModal:null, faqOpen:{}, parentPinSet:false, proxyActive:true,
+};
+
+function t(k){ return (DICT[state.lang] && DICT[state.lang][k]) || k; }
+function esc(s){ return (s||'').replace(/[&<>"]/g, c=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;'}[c])); }
+
+function computeAgeStage(birthdate){
+  if(!birthdate) return null;
+  const bd = new Date(birthdate);
+  if(isNaN(bd)) return null;
+  const now = new Date();
+  let age = now.getFullYear() - bd.getFullYear();
+  const m = now.getMonth() - bd.getMonth();
+  if(m < 0 || (m===0 && now.getDate() < bd.getDate())) age--;
+  let stage;
+  if(age <= 4) stage = 'stage_4_8';
+  else if(age <= 8) stage = 'stage_4_8';
+  else if(age <=12) stage = 'stage_9_12';
+  else if(age <=15) stage = 'stage_13_15';
+  else stage = null; // adult
+  return {age, stage};
+}
+
+function icon(name, colorVar){
+  const paths = {
+    zigzag:'<path d="M4 17 L9 8 L13 14 L17 6 L21 12" />',
+    blob:'<circle cx="12" cy="12" r="7"/>',
+    bolt:'<path d="M13 3 L6 14 H11 L9 21 L18 9 H13 Z"/>',
+    moon:'<path d="M16 4 A9 9 0 1 0 20 18 A7 7 0 0 1 16 4 Z"/>',
+    cloud:'<path d="M7 17 a4 4 0 1 1 1-7.9 A5 5 0 0 1 18 11 a3.5 3.5 0 0 1-1 6.9 H7 Z"/>',
+    plate:'<circle cx="12" cy="12" r="7"/><path d="M5 4 V10 M5 4 L3.5 4 M5 4 L6.5 4 M19 4 V20"/>',
+    shoe:'<path d="M4 16 h4 l3-3 h6 a4 4 0 0 1 4 4 v1 H4 Z"/>',
+    drop:'<path d="M12 3 C8 9 5 12.5 5 16 a7 7 0 0 0 14 0 C19 12.5 16 9 12 3 Z"/>',
+    pill:'<rect x="4" y="9" width="16" height="7" rx="3.5" transform="rotate(-30 12 12)"/>',
+    book:'<path d="M4 5 h7 v14 H4 Z M13 5 h7 v14 h-7 Z"/>',
+    wrench:'<path d="M14 4 a4 4 0 0 0-5.6 4.6 L4 13 l3 3 l4.4-4.4 A4 4 0 0 0 16 6 Z"/>',
+    fork:'<path d="M6 4 v7 M9 4 v7 M6 11 v9 M15 4 a3 3 0 0 0 0 8 v8"/>',
+    briefcase:'<rect x="4" y="8" width="16" height="11" rx="2"/><path d="M9 8 V6 a2 2 0 0 1 2-2 h2 a2 2 0 0 1 2 2 v2"/>',
+    lolli:'<circle cx="12" cy="9" r="5"/><path d="M12 14 v7"/>',
+  };
+  const c = 'var(--'+colorVar+')';
+  return '<svg class="icon" viewBox="0 0 24 24" fill="none" stroke="'+c+'" stroke-width="2.4" stroke-linecap="round" stroke-linejoin="round">'+(paths[name]||paths.blob)+'</svg>';
+}
+
+function toast(msg){
+  const el = document.getElementById('toast');
+  el.textContent = msg; el.classList.add('show');
+  clearTimeout(window._toastT);
+  window._toastT = setTimeout(()=>el.classList.remove('show'), 1400);
+}
+
+function goto(screen){
+  state.history.push(state.screen);
+  state.screen = screen;
+  render();
+}
+function back(){
+  if(state.history.length){ state.screen = state.history.pop(); render(); }
+}
+function openModal(id){ state.activeModal = id; render(); }
+function closeModal(){ state.activeModal = null; render(); }
+
+function toggleFocus(id){
+  const i = state.ob.focus.indexOf(id);
+  if(i>-1) state.ob.focus.splice(i,1); else state.ob.focus.push(id);
+  render();
+}
+function toggleModule(id){
+  const i = state.ob.modules.indexOf(id);
+  if(i>-1){ state.ob.modules.splice(i,1); render(); return; }
+  if(state.ob.modules.length >= 3 && !state.premium){ openModal('paywall'); return; }
+  state.ob.modules.push(id); render();
+}
+
+// --- Onboarding step order logic ---
+function nextOnboardingStep(cur){
+  const ob = state.ob;
+  const genderIsMale = ob.gender === 'm';
+  const stageInfo = ob.birthdate ? computeAgeStage(ob.birthdate) : null;
+  const isYoungestKidsStage = stageInfo && stageInfo.stage === 'stage_4_8';
+  switch(cur){
+    case 'welcome': return 'name';
+    case 'name': return 'profile';
+    case 'profile': return state.isMinor ? 'parent' : 'focus';
+    case 'parent': return 'focus';
+    case 'focus': return 'reason';
+    case 'reason': return 'medq';
+    case 'medq': return (ob.medStatus==='yes'||ob.medStatus==='sometimes') ? 'medadd' : 'cycle';
+    case 'medadd': return 'cycle';
+    case 'cycle': {
+      const skip = genderIsMale || (IS_KIDS && isYoungestKidsStage);
+      return skip ? 'generalhormone' : 'hormonal';
+    }
+    case 'hormonal': return 'generalhormone';
+    case 'generalhormone': return 'health';
+    case 'health': return 'reminders';
+    case 'reminders': return 'modules';
+    case 'modules': return 'finish';
+    default: return 'finish';
+  }
+}
+function showCycleStep(){
+  const ob = state.ob;
+  const stageInfo = ob.birthdate ? computeAgeStage(ob.birthdate) : null;
+  const isYoungestKidsStage = stageInfo && stageInfo.stage === 'stage_4_8';
+  return ob.gender !== 'm' && !(IS_KIDS && isYoungestKidsStage);
+}
+function goNextOnboarding(){
+  let n = nextOnboardingStep(state.screen);
+  // skip cycle if not applicable
+  if(n === 'hormonal' && state.ob.cycleOptIn !== 'yes') n = 'generalhormone';
+  if(n === 'cycle' && !showCycleStep()) n = 'generalhormone';
+  // Kids version (pure kinder, no parent screens): parent step never shown
+  if(n === 'parent' && VERSION==='kinder') n='focus';
+  state.history.push(state.screen);
+  state.screen = n;
+  render();
+}
+
+// ---------- RENDER SCREENS ----------
+function renderTopChrome(showBack){
+  return '<div class="topbar">'+
+    (showBack? '<div class="iconbtn" onclick="back()" aria-label="'+t('back')+'"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.4" stroke-linecap="round" stroke-linejoin="round"><path d="M15 5 L8 12 L15 19"/></svg></div>' : '<div style="width:34px"></div>')+
+    '<button class="langbtn" onclick="switchLang()">'+ (state.lang==='de'?'DE / EN':'EN / DE') +'</button>'+
+  '</div>';
+}
+
+function renderWelcome(){
+  return renderTopChrome(false) +
+  '<div class="screen center">'+
+    '<div class="serif" style="font-size:30px;font-weight:700;letter-spacing:.02em;">'+t('brand')+'</div>'+
+    '<div style="font-size:12px;letter-spacing:.14em;text-transform:uppercase;color:var(--ink-soft);margin-top:6px;">'+t('claim')+'</div>'+
+    '<p style="font-size:14px;color:var(--ink-soft);max-width:280px;margin-top:18px;">'+ t(IS_KIDS?'welcome_sub_kids':'welcome_sub_ab18') +'</p>'+
+    '<div class="badge-disclaimer">'+t('disclaimer')+'</div>'+
+    '<div style="width:100%;margin-top:28px;"><button class="btn" onclick="goNextOnboarding()">'+t('start')+'</button></div>'+
+  '</div>';
+}
+
+function progressBar(idx,total){
+  let s='<div class="progress">';
+  for(let i=0;i<total;i++) s+='<span class="'+(i<idx?'done':'')+'"></span>';
+  return s+'</div>';
+}
+
+function renderName(){
+  return renderTopChrome(true)+'<div class="screen">'+progressBar(1,12)+
+  '<h2>'+t('step_name_title')+'</h2>'+
+  '<input type="text" placeholder="'+t('step_name_ph')+'" value="'+esc(state.ob.name)+'" oninput="state.ob.name=this.value">'+
+  '<div style="margin-top:24px"><button class="btn" '+(!state.ob.name?'disabled':'')+' onclick="goNextOnboarding()">'+t('weiter')+'</button></div>'+
+  '</div>';
+}
+
+function renderProfile(){
+  const ob = state.ob;
+  const genders=[['w','gender_w'],['m','gender_m'],['d','gender_d'],['k','gender_k']];
+  return renderTopChrome(true)+'<div class="screen">'+progressBar(2,12)+
+  '<h2>'+t('step_profile_title')+'</h2>'+
+  '<label>'+t('gender_id_label')+'</label>'+
+  '<div class="pillrow">'+genders.map(g=>'<span class="pill '+(ob.gender===g[0]?'active':'')+'" onclick="state.ob.gender=\''+g[0]+'\';render()">'+t(g[1])+'</span>').join('')+'</div>'+
+  '<label>'+t('height_label')+'</label><input type="number" value="'+esc(ob.height)+'" oninput="state.ob.height=this.value">'+
+  '<label>'+t('weight_label')+'</label><input type="number" value="'+esc(ob.weight)+'" oninput="state.ob.weight=this.value">'+
+  (!ob.ageSkip ? (
+    '<label>'+t('birthdate_label')+'</label><input type="date" value="'+esc(ob.birthdate)+'" onchange="state.ob.birthdate=this.value;render()">'+
+    (ob.birthdate ? '<label style="display:flex;align-items:center;gap:8px;margin-top:12px;"><input type="checkbox" style="width:auto;margin:0" '+(ob.ageTruth?'checked':'')+' onchange="state.ob.ageTruth=this.checked;render()"> <span style="font-weight:400;font-size:12px;">'+t('age_truth_confirm')+'</span></label>' : '')+
+    '<div style="margin-top:8px;font-size:12px;color:var(--ink-soft);text-decoration:underline;cursor:pointer;" onclick="state.ob.ageSkip=true;render()">'+t('birthdate_skip')+'</div>'
+  ) : (
+    '<label style="display:flex;align-items:center;gap:8px;margin-top:14px;"><input type="checkbox" style="width:auto;margin:0" '+(ob.ageConfirm16?'checked':'')+' onchange="state.ob.ageConfirm16=this.checked;render()"><span style="font-weight:400;font-size:12px;">'+t('age_confirm')+'</span></label>'+
+    '<div style="margin-top:8px;font-size:12px;color:var(--ink-soft);text-decoration:underline;cursor:pointer;" onclick="state.ob.ageSkip=false;render()">'+t('birthdate_label')+'</div>'
+  ))+
+  '<div style="margin-top:24px"><button class="btn" '+(!ob.gender || (!ob.ageSkip && ob.birthdate && !ob.ageTruth) || (ob.ageSkip && !ob.ageConfirm16) ? 'disabled':'')+' onclick="onProfileNext()">'+t('weiter')+'</button></div>'+
+  '</div>';
+}
+function onProfileNext(){
+  const ob = state.ob;
+  if(ob.birthdate){
+    const info = computeAgeStage(ob.birthdate);
+    if(info && info.age < 16){ state.isMinor = true; state.ageStage = info.stage; }
+    else { state.isMinor = false; state.ageStage = null; }
+  } else {
+    state.isMinor = false; state.ageStage = null;
+  }
+  if(VERSION === 'kinder'){ state.isMinor = false; } // kinder-only build skips interactive parent flow
+  goNextOnboarding();
+}
+
+function renderParent(){
+  return renderTopChrome(true)+'<div class="screen">'+progressBar(3,12)+
+  '<h2>'+t('step_parent_title')+'</h2>'+
+  '<p style="font-size:13px;color:var(--ink-soft)">'+t('parent_intro')+'</p>'+
+  '<label>'+t('parent_name_label')+'</label>'+
+  '<input type="text" value="'+esc(state.ob.parentName)+'" oninput="state.ob.parentName=this.value">'+
+  '<label style="display:flex;align-items:flex-start;gap:8px;margin-top:16px;"><input type="checkbox" style="width:auto;margin-top:3px" '+(state.ob.parentConsent?'checked':'')+' onchange="state.ob.parentConsent=this.checked;render()"><span style="font-weight:400;font-size:13px;">'+t('parent_consent_check')+'</span></label>'+
+  '<div class="info-note">'+t('parent_proto_note')+'</div>'+
+  '<div style="margin-top:24px"><button class="btn" '+(!state.ob.parentName || !state.ob.parentConsent?'disabled':'')+' onclick="goNextOnboarding()">'+t('confirm')+'</button></div>'+
+  '</div>';
+}
+
+function renderFocus(){
+  const items=['fokus','stimmung','energie','schlaf','stress','medikation','zyklus','hormone','ernaehrung','libido']
+    .filter(id=> id!=='zyklus' || showCycleStep());
+  return renderTopChrome(true)+'<div class="screen">'+progressBar(4,12)+
+  '<h2>'+t('step_focus_title')+'</h2>'+
+  '<div class="pillrow">'+items.map(id=>'<span class="pill '+(state.ob.focus.includes(id)?'active':'')+'" onclick="toggleFocus(\''+id+'\')">'+t('focus_'+id)+'</span>').join('')+'</div>'+
+  '<div style="margin-top:24px"><button class="btn" onclick="goNextOnboarding()">'+t('weiter')+'</button></div>'+
+  '</div>';
+}
+
+function renderReason(){
+  const opts=[['have','reason_have'],['suspect','reason_suspect'],['clarify','reason_clarify'],['general','reason_general']];
+  return renderTopChrome(true)+'<div class="screen">'+progressBar(5,12)+
+  '<h2>'+t('step_reason_title')+'</h2>'+
+  opts.map(o=>'<div class="opt '+(state.ob.reason===o[0]?'active':'')+'" onclick="state.ob.reason=\''+o[0]+'\';render()">'+t(o[1])+'</div>').join('')+
+  '<div style="margin-top:16px"><button class="btn" '+(!state.ob.reason?'disabled':'')+' onclick="goNextOnboarding()">'+t('weiter')+'</button></div>'+
+  '</div>';
+}
+
+function renderMedQ(){
+  const title = state.ob.reason==='have' ? t('step_med_q_title_adhd') : t('step_med_q_title_general');
+  const opts=[['yes','med_yes'],['sometimes','med_sometimes'],['no','med_no'],['unknown','med_unknown']];
+  return renderTopChrome(true)+'<div class="screen">'+progressBar(6,12)+
+  '<h2>'+title+'</h2>'+
+  opts.map(o=>'<div class="opt '+(state.ob.medStatus===o[0]?'active':'')+'" onclick="state.ob.medStatus=\''+o[0]+'\';render()">'+t(o[1])+'</div>').join('')+
+  '<div style="margin-top:16px"><button class="btn" '+(!state.ob.medStatus?'disabled':'')+' onclick="goNextOnboarding()">'+t('weiter')+'</button></div>'+
+  '</div>';
+}
+
+function addMedDraft(){
+  if(!state.ob.medDraft.name) return;
+  state.ob.meds.push({...state.ob.medDraft});
+  state.ob.medDraft={name:'',dose:'',freq:'1'};
+  render();
+}
+function renderMedAdd(){
+  return renderTopChrome(true)+'<div class="screen">'+progressBar(7,12)+
+  '<h2>'+t('step_medadd_title')+'</h2>'+
+  state.ob.meds.map(m=>'<div class="card" style="padding:10px 14px;"><b>'+esc(m.name)+'</b> '+esc(m.dose)+' · '+esc(m.freq)+'x/'+ (state.lang==='de'?'Tag':'day') +'</div>').join('')+
+  '<label>'+t('med_name_label')+'</label><input type="text" placeholder="'+t('med_name_ph')+'" value="'+esc(state.ob.medDraft.name)+'" oninput="state.ob.medDraft.name=this.value">'+
+  '<label>'+t('med_dose_label')+'</label><input type="text" value="'+esc(state.ob.medDraft.dose)+'" oninput="state.ob.medDraft.dose=this.value">'+
+  '<label>'+t('med_freq_label')+'</label><select onchange="state.ob.medDraft.freq=this.value">'+[1,2,3,4].map(n=>'<option value="'+n+'" '+(state.ob.medDraft.freq==n?'selected':'')+'>'+n+'</option>').join('')+'</select>'+
+  '<div style="margin-top:12px"><button class="btn secondary small" onclick="addMedDraft()">'+t('add_more_med')+'</button></div>'+
+  '<div style="margin-top:20px;display:flex;gap:8px;">'+
+    '<button class="btn secondary" onclick="goNextOnboarding()">'+t('later_settings')+'</button>'+
+    '<button class="btn" onclick="addMedDraft();goNextOnboarding()">'+t('weiter')+'</button>'+
+  '</div></div>';
+}
+
+function renderCycle(){
+  const opts=[['yes','cycle_yes'],['no','cycle_no'],['later','cycle_later']];
+  return renderTopChrome(true)+'<div class="screen">'+progressBar(8,12)+
+  '<h2>'+t('step_cycle_title')+'</h2>'+
+  '<div class="banner">'+t('cycle_banner')+
+    '<div style="margin-top:8px"><button class="btn small" onclick="state.ob.cycleBannerOk=true;render()">'+t('cycle_banner_confirm')+'</button></div>'+
+  '</div>'+
+  opts.map(o=>'<div class="opt '+(state.ob.cycleOptIn===o[0]?'active':'')+'" onclick="state.ob.cycleOptIn=\''+o[0]+'\';render()">'+t(o[1])+'</div>').join('')+
+  (state.isMinor && SHOW_PARENT_SCREENS && state.ob.cycleOptIn==='yes' ? '<div class="info-note">'+t('pin_required')+'</div>' : '')+
+  '<div style="margin-top:16px"><button class="btn" '+(!state.ob.cycleOptIn?'disabled':'')+' onclick="goNextOnboarding()">'+t('weiter')+'</button></div>'+
+  '</div>';
+}
+
+function renderHormonal(){
+  const opts=[['contra','horm_contra'],['preg','horm_preg'],['peri','horm_peri'],['none','horm_none']];
+  return renderTopChrome(true)+'<div class="screen">'+progressBar(9,12)+
+  '<h2>'+t('step_hormonal_title')+'</h2>'+
+  opts.map(o=>'<div class="opt '+(state.ob.hormonalStatus===o[0]?'active':'')+'" onclick="state.ob.hormonalStatus=\''+o[0]+'\';render()">'+t(o[1])+'</div>').join('')+
+  '<div style="margin-top:16px"><button class="btn" onclick="goNextOnboarding()">'+t('weiter')+'</button></div>'+
+  '</div>';
+}
+
+function renderGeneralHormone(){
+  let sub;
+  if(IS_KIDS) sub = t('generalhormone_sub_kids');
+  else sub = state.ob.gender==='m' ? t('generalhormone_sub_adult_m') : t('generalhormone_sub_adult_f');
+  return renderTopChrome(true)+'<div class="screen">'+progressBar(10,12)+
+  '<h2>'+t('step_generalhormone_title')+'</h2>'+
+  '<p style="font-size:13px;color:var(--ink-soft)">'+sub+'</p>'+
+  ['yes','no','later'].map(v=>'<div class="opt '+(state.ob.generalHormone===v?'active':'')+'" onclick="state.ob.generalHormone=\''+v+'\';render()">'+t('cycle_'+v)+'</div>').join('')+
+  '<div style="margin-top:16px"><button class="btn" onclick="goNextOnboarding()">'+t('weiter')+'</button></div>'+
+  '</div>';
+}
+
+function renderHealth(){
+  if(IS_KIDS){
+    // kids: health import is not part of mandatory onboarding -> auto-skip with explanatory note only
+    return renderTopChrome(true)+'<div class="screen">'+progressBar(11,12)+
+    '<h2>'+t('step_health_title')+'</h2>'+
+    '<div class="info-note">'+ (state.lang==='de' ? 'Bei Kinderprofilen ist der Health-Import kein Pflichtschritt im Onboarding, sondern später ein granularer Opt-in in den Einstellungen'+(SHOW_PARENT_SCREENS?' – zusätzlich abgesichert über die Eltern-PIN.':'.') : 'For child profiles, health import is not a mandatory onboarding step, but a granular opt-in later in settings'+(SHOW_PARENT_SCREENS?', additionally protected by the parent PIN.':'.')) +'</div>'+
+    '<div style="margin-top:16px"><button class="btn" onclick="goNextOnboarding()">'+t('weiter')+'</button></div>'+
+    '</div>';
+  }
+  return renderTopChrome(true)+'<div class="screen">'+progressBar(11,12)+
+  '<h2>'+t('step_health_title')+'</h2>'+
+  '<p style="font-size:13px;color:var(--ink-soft)">'+t('health_sub_ios')+'</p>'+
+  '<div class="info-note"><span class="iconbtn" style="width:18px;height:18px;display:inline-flex;vertical-align:middle;margin-right:6px;font-size:11px;">i</span>'+t('health_info')+'</div>'+
+  '<div style="margin-top:16px;display:flex;gap:8px;">'+
+    '<button class="btn secondary" onclick="goNextOnboarding()">'+t('skip')+'</button>'+
+    '<button class="btn" onclick="state.ob.healthSync=true;goNextOnboarding()">'+t('health_connect')+'</button>'+
+  '</div></div>';
+}
+
+function renderReminders(){
+  return renderTopChrome(true)+'<div class="screen">'+progressBar(11,12)+
+  '<h2>'+t('step_reminders_title')+'</h2>'+
+  '<div class="card"><div class="rowline" style="border:none;padding:0;"><span class="lab">'+t('rem_med')+'</span><div class="toggle '+(state.ob.remMed?'on':'')+'" onclick="state.ob.remMed=!state.ob.remMed;render()"><div class="dot"></div></div></div><div style="font-size:12px;color:var(--ink-soft);margin-top:6px;">'+t('rem_med_sub')+'</div></div>'+
+  '<div class="card"><div class="rowline" style="border:none;padding:0;"><span class="lab">'+t('rem_recap')+'</span><div class="toggle '+(state.ob.remRecap?'on':'')+'" onclick="state.ob.remRecap=!state.ob.remRecap;render()"><div class="dot"></div></div></div><div style="font-size:12px;color:var(--ink-soft);margin-top:6px;">'+t('rem_recap_sub')+'</div></div>'+
+  '<div style="margin-top:8px"><button class="btn" onclick="goNextOnboarding()">'+t('weiter')+'</button></div>'+
+  '</div>';
+}
+
+function renderModulesStep(){
+  return renderTopChrome(true)+'<div class="screen">'+progressBar(12,12)+
+  '<h2>'+t('step_modules_title')+'</h2>'+
+  '<p style="font-size:12px;color:var(--ink-soft)">'+t('modules_sub')+'</p>'+
+  MODULES.filter(m=> m.id!=='zyklus' || showCycleStep()).map(m=>{
+    const active = state.ob.modules.includes(m.id);
+    const locked = !active && state.ob.modules.length>=3;
+    const c = moduleColor(m.id);
+    return '<div class="rowline" onclick="toggleModule(\''+m.id+'\')"><span class="lab"><span class="mod-icon" style="background:var(--'+c+'-soft)">'+icon(m.icon,c)+'</span>'+moduleLabel(m.id)+'</span>'+ (locked? '<span style="font-size:10px;font-weight:800;'+proBadgeStyle()+'padding:3px 7px;border-radius:6px;">'+t('pro')+'</span>' : '<div class="toggle '+(active?'on':'')+'"><div class="dot"></div></div>') +'</div>';
+  }).join('')+
+  '<div style="margin-top:16px"><button class="btn" onclick="goNextOnboarding()">'+t('weiter')+'</button></div>'+
+  '</div>';
+}
+function moduleLabel(id){
+  const map={fokus:'focus_fokus',stimmung:'focus_stimmung',energie:'focus_energie',schlaf:'focus_schlaf',stress:'focus_stress',ernaehrung:'focus_ernaehrung',bewegung: state.lang==='de'?'Bewegung':'Movement', zyklus:'focus_zyklus', medikation:'focus_medikation', libido:'focus_libido', schule: state.lang==='de'?'Schule':'School', arbeituni: state.lang==='de'?'Arbeit/Uni':'Work/Uni'};
+  const v = map[id];
+  return v && v.startsWith('focus_') ? t(v) : v;
+}
+
+function renderFinish(){
+  state.today.modules = [...state.ob.modules];
+  return '<div class="screen center">'+
+  '<h2>'+t('step_finish_title')+'</h2>'+
+  '<p style="font-size:13px;color:var(--ink-soft)">'+t('finish_sub')+'</p>'+
+  '<div class="pillrow">'+ (state.ob.modules.length? state.ob.modules.map(id=>'<span class="pill active">'+moduleLabel(id)+'</span>').join('') : '<span style="font-size:12px;color:var(--ink-faint)">–</span>') +'</div>'+
+  (SHOW_PARENT_SCREENS && state.isMinor ? '<div style="width:100%;margin-top:10px"><button class="btn secondary" onclick="goto(\'parentpinsetup\')">'+t('set_pin')+'</button></div>' : '')+
+  '<div style="width:100%;margin-top:16px"><button class="btn" onclick="finishOnboarding()">'+t('open_app')+'</button></div>'+
+  '</div>';
+}
+function renderParentPinSetup(){
+  return renderTopChrome(true)+'<div class="screen">'+
+  '<h2>'+t('set_pin')+'</h2>'+
+  '<p style="font-size:13px;color:var(--ink-soft)">'+t('parentpin_intro')+'</p>'+
+  '<input type="text" maxlength="4" placeholder="••••" style="text-align:center;letter-spacing:8px;font-size:20px;">'+
+  '<div style="margin-top:16px"><button class="btn" onclick="state.parentPinSet=true;back()">'+t('confirm')+'</button></div>'+
+  '</div>';
+}
+
+function finishOnboarding(){
+  state.screen='main'; state.history=[]; render();
+}
+
+// ---------- MAIN APP ----------
+function navBar(){
+  const t1 = t('nav_today'), t2 = IS_KIDS? t('nav_insights_kids'):t('nav_insights_adult'), t3=t('nav_settings');
+  const cur = state.mainTab||'today';
+  const item=(id,label,path)=>'<div class="navitem '+(cur===id?'active':'')+'" onclick="state.mainTab=\''+id+'\';render()"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round">'+path+'</svg><span>'+label+'</span></div>';
+  return '<div class="bottomnav">'+
+    item('today',t1,'<circle cx="12" cy="12" r="8"/><path d="M12 8 v4 l3 2"/>')+
+    item('insights',t2,'<path d="M4 19 V10 M10 19 V5 M16 19 V13 M22 19 V8"/>')+
+    item('settings',t3,'<path d="M14 4 a4 4 0 0 0-5.6 4.6 L4 13 l3 3 l4.4-4.4 A4 4 0 0 0 16 6 Z"/>')+
+  '</div>';
+}
+
+function tileRow(key, min, max, anchorLo, anchorHi){
+  let s='<div class="tile-row">';
+  for(let i=min;i<=max;i++){
+    s+='<div class="tile '+(state.today[key]===i?'active':'')+'" onclick="setToday(\''+key+'\','+i+')">'+i+'</div>';
+  }
+  s+='</div><div class="anchors"><span>'+anchorLo+'</span><span>'+anchorHi+'</span></div>';
+  return s;
+}
+function setToday(key,val){ state.today[key]=val; toast(t('saved')); render(); }
+function setSleepQ(v){ state.today.sleepQ=v; toast(t('saved')); render(); }
+function stepSleep(d){ state.today.sleepH=Math.max(0,Math.round((state.today.sleepH+d)*2)/2); toast(t('saved')); render(); }
+function toggleQt(tag){
+  const i = state.today.qt.indexOf(tag);
+  if(i>-1) state.today.qt.splice(i,1); else state.today.qt.push(tag);
+  toast(t('saved')); render();
+}
+function medCheck(){
+  state.today.medTaken = state.today.medTaken? 0 : 1;
+  toast(t('medmod_taken_toast')); render();
+}
+
+function renderToday(){
+  const mods = state.today.modules||[];
+  const has = id => mods.includes(id);
+  const hour = new Date().getHours();
+  const greet = hour<12 ? (state.lang==='de'?'Guten Morgen':'Good morning') : hour<18 ? (state.lang==='de'?'Guten Tag':'Good afternoon') : (state.lang==='de'?'Guten Abend':'Good evening');
+  let html = renderTopChrome(false)+'<div class="screen">';
+  html += '<h2 style="margin-bottom:2px">'+greet+(state.ob.name?', '+esc(state.ob.name):'')+'</h2>';
+
+  if(has('medikation') && state.ob.meds.length){
+    html += '<div class="card"><h3>'+moduleLabel('medikation')+'</h3>';
+    state.ob.meds.forEach(m=>{
+      html += '<div class="rowline" style="border:none;padding:6px 0;"><span class="lab">'+icon('pill','blue')+' '+esc(m.name)+' '+esc(m.dose)+'</span>'+
+      (m.freq==1 ? '<div class="toggle '+(state.today.medTaken?'on':'')+'" onclick="medCheck()"><div class="dot"></div></div>' :
+        '<span style="font-size:12px;font-weight:700;">'+state.today.medTaken+'/'+m.freq+' '+t('med_taken_of')+'</span>') +
+      '</div>';
+    });
+    html += '</div>';
+  }
+  if(has('zyklus')){
+    html += '<div class="card"><h3>'+moduleLabel('zyklus')+'</h3><p style="font-size:12px;color:var(--ink-soft)">'+(state.lang==='de'?'Zyklustag 14 (Demo)':'Cycle day 14 (demo)')+'</p><a style="font-size:12px;color:var(--blue);cursor:pointer;">'+ (state.lang==='de'?'Zyklus loggen →':'Log cycle →') +'</a></div>';
+  }
+  const scaleDefs = [
+    ['fokus','focus_fokus', state.lang==='de'?'1 · kaum fokussiert':'1 · barely focused', state.lang==='de'?'5 · sehr fokussiert':'5 · very focused'],
+    ['stimmung','focus_stimmung', state.lang==='de'?'1 · schlecht':'1 · low', state.lang==='de'?'5 · sehr gut':'5 · great'],
+    ['energie','focus_energie', state.lang==='de'?'1 · erschöpft':'1 · exhausted', state.lang==='de'?'5 · voller Energie':'5 · energized'],
+    ['stress','focus_stress', state.lang==='de'?'1 · wenig Stress':'1 · low stress', state.lang==='de'?'5 · viel Stress':'5 · high stress'],
+  ];
+  scaleDefs.forEach(([key,labelKey,lo,hi])=>{
+    if(!has(key)) return;
+    html += '<div class="card"><h3>'+t(labelKey)+'</h3>'+tileRow(key,1,5,lo,hi)+'</div>';
+  });
+  if(has('schlaf')){
+    html += '<div class="card"><h3>'+t('sleep_title')+'</h3><div style="display:flex;align-items:center;justify-content:space-between;">'+
+    '<div class="iconbtn" onclick="stepSleep(-0.5)">−</div><div style="font-family:var(--font-head);font-size:22px;">'+state.today.sleepH+' h</div><div class="iconbtn" onclick="stepSleep(0.5)">+</div></div>'+
+    '<div style="display:flex;gap:6px;margin-top:10px;">'+['q_bad','q_ok','q_good','q_super'].map((k,i)=>'<span class="pill '+(state.today.sleepQ===i?'active':'')+'" onclick="setSleepQ('+i+')">'+t(k)+'</span>').join('')+'</div></div>';
+  }
+  const qtCats = [
+    ['mood', state.lang==='de'?'Stimmung':'Mood', ['ruhig/calm','gereizt/irritable','überwältigt/overwhelmed']],
+    ['cognitive', state.lang==='de'?'Kognitiv':'Cognitive', ['klar/clear','vernebelt/foggy','hyperfokus/hyperfocus']],
+    ['physical', state.lang==='de'?'Körperlich':'Physical', ['schmerzen/pain','angespannt/tense','entspannt/relaxed']],
+  ];
+  if(has('medikation')) qtCats.push(['sideeffects', state.lang==='de'?'Nebenwirkungen':'Side effects', ['appetitlos/no appetite','schlaflos/insomnia']]);
+  if(has('zyklus')) qtCats.push(['cycle', state.lang==='de'?'Zyklus':'Cycle', ['Krämpfe/cramps','Schmierblutung/spotting']]);
+  if(!IS_KIDS) qtCats.push(['substances', state.lang==='de'?'Substanzen':'Substances', ['Koffein/caffeine','Alkohol/alcohol']]);
+  qtCats.push(['everyday', state.lang==='de'?'Alltag':'Everyday', ['Reisen/travel','Konflikt/conflict']]);
+  qtCats.push(['nutrition', state.lang==='de'?'Ernährung':'Nutrition', [state.lang==='de'?'ausgewogen gegessen':'balanced meal', state.lang==='de'?'nur Süßigkeiten':'only sweets', state.lang==='de'?'kein Hunger':'no appetite']]);
+  if(!IS_KIDS) qtCats.push(['libido', state.lang==='de'?'Libido':'Libido', ['hoch/high','niedrig/low']]);
+
+  html += '<h3>'+t('quicktrack')+'</h3>';
+  qtCats.forEach(([catId,label,tags])=>{
+    html += '<div style="font-size:11px;font-weight:700;color:var(--ink-faint);margin:8px 0 2px;">'+label+'</div><div class="qt-scroll">';
+    tags.forEach(tag=>{
+      const dispTag = state.lang==='de'? tag.split('/')[0] : (tag.split('/')[1]||tag.split('/')[0]);
+      html += '<div class="qt-chip '+(state.today.qt.includes(catId+':'+tag)?'active':'')+'" onclick="toggleQt(\''+catId+':'+tag+'\')">'+dispTag+'</div>';
+    });
+    html += '<div class="qt-chip" onclick="toggleQt(\''+catId+':custom\')">'+t('qt_custom')+'</div></div>';
+  });
+
+  html += '<div class="disc-bottom">'+t('today_disclaimer')+'</div>';
+  html += '</div>' + navBar();
+  return html;
+}
+
+function svgLineChart(seriesList, width, height){
+  const pad=20;
+  let svg = '<svg viewBox="0 0 '+width+' '+height+'" width="100%" height="'+height+'">';
+  svg += '<line x1="'+pad+'" y1="'+(height-pad)+'" x2="'+(width-6)+'" y2="'+(height-pad)+'" stroke="var(--sand-border)" stroke-width="1"/>';
+  const dashes = ['0','6,4','2,3','8,3,2,3'];
+  const shapes = ['circle','square','triangle','diamond'];
+  seriesList.forEach((s, si)=>{
+    const vals = s.values;
+    const n = vals.length;
+    const stepX = (width - pad - 10) / (n-1);
+    let d='';
+    const pts=[];
+    vals.forEach((v,i)=>{
+      const x = pad + i*stepX;
+      const y = height - pad - v*(height-pad-10);
+      pts.push([x,y]);
+      d += (i===0?'M':'L')+x.toFixed(1)+' '+y.toFixed(1)+' ';
+    });
+    svg += '<path d="'+d+'" fill="none" stroke="var(--'+s.color+')" stroke-width="2.5" stroke-dasharray="'+dashes[si%4]+'" stroke-linecap="round" stroke-linejoin="round"/>';
+    pts.forEach(([x,y])=>{
+      const shape = shapes[si%4];
+      if(shape==='circle') svg+='<circle cx="'+x+'" cy="'+y+'" r="3" fill="var(--'+s.color+')"/>';
+      else if(shape==='square') svg+='<rect x="'+(x-3)+'" y="'+(y-3)+'" width="6" height="6" fill="var(--'+s.color+')"/>';
+      else if(shape==='triangle') svg+='<polygon points="'+x+','+(y-4)+' '+(x-4)+','+(y+3)+' '+(x+4)+','+(y+3)+'" fill="var(--'+s.color+')"/>';
+      else svg+='<polygon points="'+x+','+(y-4)+' '+(x+4)+','+y+' '+x+','+(y+4)+' '+(x-4)+','+y+'" fill="var(--'+s.color+')"/>';
+    });
+  });
+  svg += '</svg>';
+  return svg;
+}
+function demoSeries(seed, n){
+  let v=0.5, arr=[];
+  for(let i=0;i<n;i++){ v += (Math.sin(seed+i*1.3)*0.15); v=Math.max(0.08,Math.min(0.95,v)); arr.push(v); }
+  return arr;
+}
+
+function renderInsights(){
+  const mods = state.today.modules && state.today.modules.length ? state.today.modules : ['fokus','stimmung'];
+  if(!state.insights.activeModuleTab) state.insights.activeModuleTab = mods[0];
+  if(!state.insights.combined.length) state.insights.combined = mods.slice(0,2);
+  const n = state.insights.range==='7'?7: state.insights.range==='month'?12:12;
+  let html = renderTopChrome(false)+'<div class="screen">';
+  html += '<h2>'+(IS_KIDS?t('nav_insights_kids'):t('nav_insights_adult'))+'</h2>';
+  html += '<div style="display:flex;gap:8px;margin-bottom:10px;">'+
+    ['single','combined'].map(m=>'<span class="pill '+(state.insights.mode===m?'active':'')+'" onclick="state.insights.mode=\''+m+'\';render()">'+t('view_'+m)+'</span>').join('')+'</div>';
+  html += '<div style="display:flex;gap:8px;margin-bottom:10px;">'+
+    ['7','month','3m'].map(r=>'<span class="pill '+(state.insights.range===r?'active':'')+'" onclick="state.insights.range=\''+r+'\';render()">'+t('range_'+(r==='7'?'7':r==='month'?'month':'3m'))+'</span>').join('')+'</div>';
+
+  if(state.insights.mode==='single'){
+    html += '<div class="qt-scroll">'+mods.map(id=>'<div class="qt-chip '+(state.insights.activeModuleTab===id?'active':'')+'" onclick="state.insights.activeModuleTab=\''+id+'\';render()">'+moduleLabel(id)+'</div>').join('')+'</div>';
+  } else {
+    html += '<div class="qt-scroll">'+mods.map(id=>{
+      const on = state.insights.combined.includes(id);
+      return '<div class="qt-chip '+(on?'active':'')+'" onclick="toggleCombined(\''+id+'\')">'+moduleLabel(id)+'</div>';
+    }).join('')+'</div>';
+  }
+
+  html += '<div style="display:flex;gap:8px;margin:8px 0;">'+
+    ['chart','table'].map(v=>'<span class="pill '+(state.insights.chartOrTable===v?'active':'')+'" onclick="state.insights.chartOrTable=\''+v+'\';render()">'+t(v+'_view')+'</span>').join('')+'</div>';
+
+  const active = state.insights.mode==='single' ? [state.insights.activeModuleTab] : state.insights.combined;
+  const seriesList = active.map((id,i)=>{
+    const vals = demoSeries(i*3+1, n);
+    const key = {fokus:'fokus',stimmung:'stimmung',energie:'energie',stress:'stress'}[id];
+    if(key && state.today[key]) vals[vals.length-1] = (state.today[key]-1)/4;
+    return {color:moduleColor(id), values:vals, id};
+  });
+
+  if(state.insights.chartOrTable==='chart'){
+    html += '<div class="chartwrap">';
+    html += svgLineChart(seriesList, 340, 160);
+    if(active.some(id=>id==='medikation')){
+      html += '<div style="font-size:10px;color:var(--ink-faint);margin-top:4px;border-top:1px dashed var(--sand-border);padding-top:4px;">'+(state.lang==='de'?'⋮ Dosiswechsel am Tag 5 (Beispiel)':'⋮ Dose change on day 5 (example)')+'</div>';
+    }
+    html += '<div class="legend">'+active.map(id=>'<span><i style="background:var(--'+moduleColor(id)+')"></i>'+moduleLabel(id)+'</span>').join('')+'</div>';
+    html += '</div>';
+  } else {
+    html += '<div class="chartwrap"><table style="width:100%;font-size:11px;border-collapse:collapse;">'+
+    '<tr>'+active.map(id=>'<th style="text-align:left;padding:4px;">'+moduleLabel(id)+'</th>').join('')+'</tr>'+
+    Array.from({length:Math.min(7,n)}).map((_,r)=>'<tr>'+active.map((id,ci)=>'<td style="padding:4px;border-top:1px solid var(--sand-border)">'+ Math.round(seriesList[ci].values[r]*5*10)/10 +'</td>').join('')+'</tr>').join('')+
+    '</table></div>';
+  }
+
+  if(active.includes('zyklus')){
+    html += '<div class="banner">'+t('cycle_disclaimer_insights')+'</div>';
+  }
+
+  html += '<div class="card" onclick="openModal(\'missed\')" style="cursor:pointer;text-align:center;font-size:13px;font-weight:600;">'+t('missed_days')+'</div>';
+  html += '<div style="display:flex;gap:8px;margin:10px 0;">'+
+    '<button class="btn secondary small" style="flex:1" onclick="premiumGate(\'pdf\')">'+t('export_pdf')+' '+(state.premium?'✓':'✦')+'</button>'+
+    '<button class="btn secondary small" style="flex:1" onclick="premiumGate(\'csv\')">'+t('export_csv')+' '+(state.premium?'✓':'✦')+'</button>'+
+  '</div>';
+
+  html += renderHistorySection();
+  html += '</div>' + navBar();
+  return html;
+}
+function toggleCombined(id){
+  const i = state.insights.combined.indexOf(id);
+  if(i>-1){ if(state.insights.combined.length>1) state.insights.combined.splice(i,1); }
+  else state.insights.combined.push(id);
+  render();
+}
+function premiumGate(kind){
+  if(!state.premium){ openModal('paywall'); return; }
+  openModal(kind==='pdf' ? 'pdfpreview' : 'csvpreview');
+}
+function renderHistorySection(){
+  let html = '<h3>'+t('history_title')+'</h3>';
+  html += '<div style="display:flex;gap:8px;margin-bottom:8px;">'+
+    ['week','month'].map(v=>'<span class="pill '+(state.insights.historyView===v?'active':'')+'" onclick="state.insights.historyView=\''+v+'\';render()">'+t('history_'+v)+'</span>').join('')+'</div>';
+  if(state.insights.historyView==='week'){
+    html += '<div style="display:flex;gap:6px;">';
+    for(let i=6;i>=0;i--){
+      const v = Math.round(2+3*Math.abs(Math.sin(i+1)));
+      html += '<div style="flex:1;text-align:center;"><div style="width:100%;aspect-ratio:1;border-radius:50%;background:var(--blue-soft);display:flex;align-items:center;justify-content:center;font-size:12px;font-weight:700;">'+v+'</div><div style="font-size:9px;color:var(--ink-faint);margin-top:3px;">'+['Mo','Di','Mi','Do','Fr','Sa','So'][6-i===0?6:(6-i-1+7)%7]+'</div></div>';
+    }
+    html += '</div>';
+  } else {
+    const now = new Date(); now.setMonth(now.getMonth()+state.insights.monthOffset);
+    const y=now.getFullYear(), m=now.getMonth();
+    const first = new Date(y,m,1);
+    const startOffset = (first.getDay()+6)%7; // Monday=0
+    const daysInMonth = new Date(y,m+1,0).getDate();
+    const todayD = new Date();
+    html += '<div class="calgrid">';
+    for(let i=0;i<startOffset;i++) html+='<div></div>';
+    for(let d=1;d<=daysInMonth;d++){
+      const isToday = state.insights.monthOffset===0 && d===todayD.getDate();
+      const hasEntry = (d*7)%3===0;
+      html += '<div class="calday '+(isToday?'today':'')+'" onclick="openModal(\'daydetail\')">'+d+ (hasEntry?'<span class="dot"></span>':'') +'</div>';
+    }
+    html += '</div>';
+    html += '<div style="display:flex;justify-content:space-between;margin-top:8px;font-size:12px;">'+
+      '<span style="cursor:pointer" onclick="state.insights.monthOffset--;render()">←</span>'+
+      '<span>'+now.toLocaleDateString(state.lang==='de'?'de-DE':'en-US',{month:'long',year:'numeric'})+'</span>'+
+      '<span style="cursor:pointer" onclick="state.insights.monthOffset++;render()">→</span></div>';
+    if(state.insights.monthOffset!==0) html += '<div style="text-align:center;margin-top:6px;font-size:11px;text-decoration:underline;cursor:pointer;" onclick="state.insights.monthOffset=0;render()">'+t('today_jump')+'</div>';
+  }
+  return html;
+}
+
+function renderSettings(){
+  let html = renderTopChrome(false)+'<div class="screen">';
+  html += '<div style="display:flex;align-items:center;gap:12px;margin-bottom:6px;">'+
+    '<div style="width:56px;height:56px;border-radius:50%;background:var(--purple-soft);display:flex;align-items:center;justify-content:center;font-family:var(--font-head);font-size:22px;color:var(--purple);">'+(state.ob.name? esc(state.ob.name[0].toUpperCase()) : '?')+'</div>'+
+    '<div><div style="font-weight:700;font-size:16px;">'+esc(state.ob.name||'–')+'</div>'+
+    (!state.premium? '<a style="font-size:12px;color:var(--blue);cursor:pointer;" onclick="openModal(\'premium\')">'+t('settings_unlock_premium')+'</a>':'')+
+    '</div></div>';
+
+  const rows = [
+    ['profile','settings_profile'],
+    ['meds','settings_meds'],
+    ['modules','settings_modules'],
+  ];
+  if(SHOW_PARENT_SCREENS && state.isMinor) rows.push(['parentpin','settings_parentpin'],['proxy','settings_proxy']);
+  rows.push(['privacy','settings_privacy'],['display','settings_display'],['notif','settings_notif'],['contact','settings_contact'],['help','settings_help']);
+  if(!IS_KIDS) rows.push(['premium','settings_premium']);
+
+  html += '<div class="card" style="padding:4px 14px;">'+rows.map(([id,labelKey])=>
+    '<div class="rowline" onclick="openModal(\''+id+'\')"><span class="lab">'+t(labelKey)+'</span><span class="chev">›</span></div>'
+  ).join('')+'</div>';
+
+  if(!IS_KIDS){
+    html += '<div class="card" style="cursor:pointer;" onclick="openModal(\'kidsteaser\')"><h3>'+t('kids_area_teaser_title')+'</h3><p style="font-size:12px;color:var(--ink-soft);margin:0;">'+t('kids_area_teaser_text')+'</p></div>';
+  }
+
+  html += '</div>' + navBar();
+  return html;
+}
+
+function modalShell(title, bodyHtml){
+  return '<div class="modal-backdrop" onclick="if(event.target===this)closeModal()"><div class="modal">'+
+    '<div style="display:flex;justify-content:space-between;align-items:center;"><h2 style="margin:0">'+title+'</h2><div class="iconbtn" onclick="closeModal()">✕</div></div>'+
+    bodyHtml+
+  '</div></div>';
+}
+
+function renderModal(){
+  const id = state.activeModal;
+  if(!id) return '';
+  if(id==='profile'){
+    const stageLabel = state.ageStage ? t(state.ageStage) : null;
+    return modalShell(t('settings_profile'),
+      '<label>'+t('step_name_ph')+'</label><input type="text" value="'+esc(state.ob.name)+'" oninput="state.ob.name=this.value">'+
+      '<label>'+t('birthdate_label')+'</label><input type="date" value="'+esc(state.ob.birthdate)+'">'+
+      '<label>'+t('height_label')+'</label><input type="number" value="'+esc(state.ob.height)+'">'+
+      '<label>'+t('weight_label')+'</label><input type="number" value="'+esc(state.ob.weight)+'">'+
+      (stageLabel? '<label>'+t('age_stage_label')+'</label><div class="info-note">'+stageLabel+'</div>':'')+
+      (SHOW_PARENT_SCREENS && state.isMinor ? '<label>'+t('parent_name_label')+'</label><div class="info-note">'+esc(state.ob.parentName||'–')+' · '+(state.ob.parentConsent?(state.lang==='de'?'Einwilligung erteilt':'Consent given'):'–')+'</div><button class="btn secondary" style="margin-top:10px" onclick="revokeConsent()">'+t('revoke_consent')+'</button><div class="info-note" style="margin-top:8px">'+t('parent_proto_note')+'</div>' : '')+
+      '<div style="margin-top:16px"><button class="btn" onclick="toast(t(\'saved\'));closeModal()">'+t('confirm')+'</button></div>'
+    );
+  }
+  if(id==='meds'){
+    return modalShell(t('settings_meds'),
+      (state.ob.meds.length? state.ob.meds.map((m,i)=>'<div class="rowline"><span class="lab">'+icon('pill','blue')+' '+esc(m.name)+' '+esc(m.dose)+'</span><span class="chev" style="cursor:pointer" onclick="state.ob.meds.splice('+i+',1);render()">✕</span></div>').join('') : '<p style="font-size:13px;color:var(--ink-soft)">–</p>')+
+      '<div style="margin-top:10px"><button class="btn secondary small" onclick="const n=prompt(\'Wirkstoff?\'); if(n){state.ob.meds.push({name:n,dose:\'\',freq:\'1\'});render();}">+ '+ (state.lang==='de'?'Medikament hinzufügen':'Add medication') +'</button></div>'+
+      '<div class="info-note" style="margin-top:10px">'+t('proto_note_meds')+'</div>'
+    );
+  }
+  if(id==='modules'){
+    return modalShell(t('settings_modules'),
+      '<p style="font-size:12px;color:var(--ink-soft)">'+state.ob.modules.length+'/3 '+(state.premium?'':(state.lang==='de'?'im Basis-Tarif':'in the basic plan'))+'</p>'+
+      MODULES.filter(m=> m.id!=='zyklus' || showCycleStep()).map(m=>{
+        const active = state.ob.modules.includes(m.id);
+        const locked = !active && state.ob.modules.length>=3 && !state.premium;
+        const c = moduleColor(m.id);
+        return '<div class="rowline" onclick="toggleModule(\''+m.id+'\')"><span class="lab"><span class="mod-icon" style="background:var(--'+c+'-soft)">'+icon(m.icon,c)+'</span>'+moduleLabel(m.id)+'</span>'+ (locked? '<span style="font-size:10px;font-weight:800;'+proBadgeStyle()+'padding:3px 7px;border-radius:6px;">'+t('pro')+'</span>' : '<div class="toggle '+(active?'on':'')+'"><div class="dot"></div></div>') +'</div>';
+      }).join('')
+    );
+  }
+  if(id==='parentpin'){
+    return modalShell(t('settings_parentpin'),
+      '<p style="font-size:13px;color:var(--ink-soft)">'+t('parentpin_intro')+'</p>'+
+      '<div class="rowline"><span class="lab">'+t('set_pin')+'</span><span class="chev">'+(state.parentPinSet? '✓' : '›')+'</span></div>'+
+      '<button class="btn secondary" style="margin-top:10px" onclick="goto(\'parentpinsetup\');closeModal()">'+t('set_pin')+'</button>'
+    );
+  }
+  if(id==='proxy'){
+    return modalShell(t('settings_proxy'),
+      '<p style="font-size:13px;color:var(--ink-soft)">'+t('proxy_intro')+'</p>'+
+      '<div class="rowline"><span class="lab">'+t('proxy_toggle')+'</span><div class="toggle '+(state.proxyActive?'on':'')+'" onclick="state.proxyActive=!state.proxyActive;render()"><div class="dot"></div></div></div>'
+    );
+  }
+  if(id==='privacy'){
+    return modalShell(t('settings_privacy'),
+      '<div class="info-note">'+t('privacy_device_only')+'</div>'+
+      '<div class="rowline"><span class="lab">'+t('faceid')+'</span><div class="toggle on"><div class="dot"></div></div></div>'+
+      '<div class="rowline"><span class="lab">'+t('enc_backup')+'</span><div class="toggle" onclick="this.classList.toggle(\'on\')"><div class="dot"></div></div></div>'+
+      '<div class="info-note" style="margin-top:6px">'+t('backup_warning')+'</div>'+
+      '<div class="rowline" style="cursor:pointer"><span class="lab">'+t('restore_backup')+'</span><span class="chev">›</span></div>'+
+      '<button class="btn secondary" style="margin-top:8px" onclick="premiumGate(\'csv\')">'+t('export_csv')+'</button>'+
+      '<button class="btn secondary" style="margin-top:8px;color:var(--red);border-color:var(--red)" onclick="if(confirm(t(\'delete_data\')+\'?\'))toast(t(\'saved\'))">'+t('delete_data')+'</button>'
+    );
+  }
+  if(id==='display'){
+    return modalShell(t('settings_display'),
+      '<div class="rowline"><span class="lab">'+t('dark_mode')+'</span><div class="toggle '+(state.dark?'on':'')+'" onclick="toggleDark()"><div class="dot"></div></div></div>'+
+      '<div class="rowline"><span class="lab">'+t('language')+'</span><span class="chev">'+state.lang.toUpperCase()+'</span></div>'
+    );
+  }
+  if(id==='notif'){
+    return modalShell(t('settings_notif'),
+      '<div class="rowline"><span class="lab">'+t('rem_med')+'</span><div class="toggle '+(state.ob.remMed?'on':'')+'" onclick="state.ob.remMed=!state.ob.remMed;render()"><div class="dot"></div></div></div>'+
+      '<div class="rowline"><span class="lab">'+t('rem_recap')+'</span><div class="toggle '+(state.ob.remRecap?'on':'')+'" onclick="state.ob.remRecap=!state.ob.remRecap;render()"><div class="dot"></div></div></div>'
+    );
+  }
+  if(id==='contact'){
+    const faqs=['faq_q1','faq_q2','faq_q3','faq_q4','faq_q5'];
+    return modalShell(t('settings_contact'),
+      '<p style="font-size:13px">'+t('contact_email')+'</p>'+
+      faqs.map((qk,i)=>{
+        const ak = qk.replace('_q','_a');
+        const open = state.faqOpen[qk];
+        return '<div class="faq-item '+(open?'open':'')+'"><div class="faq-q" onclick="state.faqOpen[\''+qk+'\']=!state.faqOpen[\''+qk+'\'];render()">'+t(qk)+'</div><div class="faq-a">'+t(ak)+'</div></div>';
+      }).join('')
+    );
+  }
+  if(id==='help'){
+    return modalShell(t('settings_help'),
+      IS_KIDS ?
+      ('<div class="card">'+t('emergency_kummer')+'</div><div class="card">'+t('emergency_eltern')+'</div><div class="card">'+t('emergency_112')+'</div><p style="font-size:11px;color:var(--ink-faint)">'+t('emergency_intl')+'</p>')
+      :
+      ('<div class="card">'+t('emergency_112')+'</div><div class="card">'+t('emergency_seelsorge')+'</div><p style="font-size:11px;color:var(--ink-faint)">'+t('emergency_intl')+'</p>')
+    );
+  }
+  if(id==='premium'){
+    return modalShell(t('premium_title'),
+      '<p style="font-weight:700">'+t('premium_price')+'</p>'+
+      ['premium_feat1','premium_feat2','premium_feat3','premium_feat4'].map(k=>'<div style="font-size:13px;padding:4px 0;">✦ '+t(k)+'</div>').join('')+
+      '<div class="info-note" style="margin-top:8px">'+t('premium_store_note')+'</div>'+
+      (state.isMinor? '<div class="info-note" style="margin-top:6px">'+t('pin_required')+'</div>':'')+
+      '<div class="rowline" style="margin-top:8px"><span class="lab">'+t('premium_demo_toggle')+'</span><div class="toggle '+(state.premium?'on':'')+'" onclick="state.premium=!state.premium;render()"><div class="dot"></div></div></div>'+
+      (state.premium? '<p style="font-size:11px;color:var(--ink-faint)">'+t('range_month')+': '+state.trialLeft+' '+(state.lang==='de'?'Tage Test verbleibend':'trial days left')+'</p>':'')
+    );
+  }
+  if(id==='paywall'){
+    return modalShell(t('premium_title'),
+      '<p style="font-size:13px;color:var(--ink-soft)">'+t('premium_price')+'</p>'+
+      ['premium_feat1','premium_feat2','premium_feat3','premium_feat4'].map(k=>'<div style="font-size:13px;padding:4px 0;">✦ '+t(k)+'</div>').join('')+
+      (state.isMinor? '<div class="info-note" style="margin-top:6px">'+t('pin_required')+'</div>':'')+
+      '<button class="btn" style="margin-top:12px" onclick="state.premium=true;closeModal()">'+t('premium_demo_toggle')+'</button>'
+    );
+  }
+  if(id==='missed'){
+    const days = Array.from({length:5}).map((_,i)=>{const d=new Date();d.setDate(d.getDate()-(i+1));return d;});
+    return modalShell(t('missed_days'),
+      days.map(d=>'<div class="rowline"><span class="lab">'+d.toLocaleDateString(state.lang==='de'?'de-DE':'en-US',{weekday:'short',day:'2-digit',month:'2-digit'})+'</span><span class="chev" style="cursor:pointer;font-size:12px;text-decoration:underline;" onclick="toast(t(\'saved\'))">'+ (state.lang==='de'?'nachtragen':'log') +'</span></div>').join('')
+    );
+  }
+  if(id==='daydetail'){
+    return modalShell(state.lang==='de'?'Tages-Detail':'Day detail',
+      '<p style="font-size:13px;color:var(--ink-soft)">'+(state.lang==='de'?'Demo-Einträge dieses Tages.':'Demo entries for this day.')+'</p>'+
+      '<div class="rowline"><span class="lab">'+moduleLabel('fokus')+'</span><span>3/5</span></div>'+
+      '<div class="rowline"><span class="lab">'+moduleLabel('stimmung')+'</span><span>4/5</span></div>'
+    );
+  }
+  if(id==='pdfpreview' || id==='csvpreview'){
+    return modalShell(id==='pdfpreview'? t('export_pdf') : t('export_csv'),
+      '<p style="font-size:13px;color:var(--ink-soft)">'+(state.lang==='de'?'Demo-Vorschau des Exports.':'Demo preview of the export.')+'</p>'+
+      (id==='pdfpreview' ? '<div class="chartwrap">'+svgLineChart([{color:'blue',values:demoSeries(1,10)},{color:'red',values:demoSeries(4,10)}],300,120)+'</div><p style="font-size:11px;color:var(--ink-faint);font-style:italic;">'+t('pdf_footer')+'</p>' : '<pre style="font-size:11px;background:var(--sand-card);padding:10px;border-radius:8px;overflow-x:auto;">date,focus,mood\\n2026-07-30,3,4\\n2026-07-31,4,4\\n2026-08-01,'+(state.today.fokus||'-')+','+(state.today.stimmung||'-')+'</pre>')+
+      '<button class="btn secondary" style="margin-top:10px" onclick="toast(t(\'saved\'))">'+ (state.lang==='de'?'Teilen / Versenden':'Share / send') +'</button>'
+    );
+  }
+  if(id==='kidsteaser'){
+    return modalShell(t('kids_area_teaser_title'), '<p style="font-size:13px;color:var(--ink-soft)">'+t('kids_area_teaser_text')+'</p>');
+  }
+  return '';
+}
+function revokeConsent(){
+  if(confirm(state.lang==='de'?'Einwilligung wirklich widerrufen?':'Really revoke consent?')){
+    state.ob.parentConsent=false; toast(t('saved')); closeModal();
+  }
+}
+
+function toggleDark(){ state.dark=!state.dark; document.body.classList.toggle('dark', state.dark); render(); }
+function switchLang(){ state.lang = state.lang==='de'?'en':'de'; render(); }
+
+const OB_RENDERERS = {
+  welcome:renderWelcome, name:renderName, profile:renderProfile, parent:renderParent, focus:renderFocus,
+  reason:renderReason, medq:renderMedQ, medadd:renderMedAdd, cycle:renderCycle, hormonal:renderHormonal,
+  generalhormone:renderGeneralHormone, health:renderHealth, reminders:renderReminders, modules:renderModulesStep,
+  finish:renderFinish, parentpinsetup:renderParentPinSetup,
+};
+
+function render(){
+  let html;
+  if(state.screen==='main'){
+    const tab = state.mainTab||'today';
+    html = tab==='today' ? renderToday() : tab==='insights' ? renderInsights() : renderSettings();
+  } else {
+    html = (OB_RENDERERS[state.screen]||renderWelcome)();
+  }
+  html += renderModal();
+  document.getElementById('app').innerHTML = html;
+}
+render();
+</script>
+</body>
+</html>
