@@ -1,2 +1,0 @@
-# nodalys-prototyp
-ADHS APP
