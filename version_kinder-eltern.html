@@ -617,8 +617,8 @@ function progressBar(idx,total){
 function renderName(){
   return renderTopChrome(true)+'<div class="screen">'+progressBar(1,12)+
   '<h2>'+t('step_name_title')+'</h2>'+
-  '<input type="text" placeholder="'+t('step_name_ph')+'" value="'+esc(state.ob.name)+'" oninput="state.ob.name=this.value">'+
-  '<div style="margin-top:24px"><button class="btn" '+(!state.ob.name?'disabled':'')+' onclick="goNextOnboarding()">'+t('weiter')+'</button></div>'+
+  '<input type="text" id="nameInput" placeholder="'+t('step_name_ph')+'" value="'+esc(state.ob.name)+'" oninput="state.ob.name=this.value; document.getElementById(\'nameNextBtn\').disabled = !this.value.trim();">'+
+  '<div style="margin-top:24px"><button class="btn" id="nameNextBtn" '+(!state.ob.name?'disabled':'')+' onclick="goNextOnboarding()">'+t('weiter')+'</button></div>'+
   '</div>';
 }
 
@@ -660,10 +660,10 @@ function renderParent(){
   '<h2>'+t('step_parent_title')+'</h2>'+
   '<p style="font-size:13px;color:var(--ink-soft)">'+t('parent_intro')+'</p>'+
   '<label>'+t('parent_name_label')+'</label>'+
-  '<input type="text" value="'+esc(state.ob.parentName)+'" oninput="state.ob.parentName=this.value">'+
+  '<input type="text" id="parentNameInput" value="'+esc(state.ob.parentName)+'" oninput="state.ob.parentName=this.value; document.getElementById(\'parentConfirmBtn\').disabled = !(this.value.trim() && state.ob.parentConsent);">'+
   '<label style="display:flex;align-items:flex-start;gap:8px;margin-top:16px;"><input type="checkbox" style="width:auto;margin-top:3px" '+(state.ob.parentConsent?'checked':'')+' onchange="state.ob.parentConsent=this.checked;render()"><span style="font-weight:400;font-size:13px;">'+t('parent_consent_check')+'</span></label>'+
   '<div class="info-note">'+t('parent_proto_note')+'</div>'+
-  '<div style="margin-top:24px"><button class="btn" '+(!state.ob.parentName || !state.ob.parentConsent?'disabled':'')+' onclick="goNextOnboarding()">'+t('confirm')+'</button></div>'+
+  '<div style="margin-top:24px"><button class="btn" id="parentConfirmBtn" '+(!state.ob.parentName || !state.ob.parentConsent?'disabled':'')+' onclick="goNextOnboarding()">'+t('confirm')+'</button></div>'+
   '</div>';
 }
 
